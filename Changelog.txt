@@ -1,12 +1,20 @@
+0.6.5.4
+- Fixed issue with warning messages in console after new level load
+Known Bugs
+~ Significant lag spike at 1600x900 and larger
+~ Image artefacts still truncated when set to resolution smaller than 1920x1080
+
 0.6.5.3
 - Physics now real time
 Known Bugs
 ~ Significant lag spike at 1600x900 and larger
 ~ Image artefacts still truncated when set to resolution smaller than 1920x1080
+
 0.6.5.2
 - Fixed image deterioration due to frequent resolution change
 Known Bugs
 ~ Significant lag spike at 1600x900 and larger
 ~ Image artefacts still truncated when set to resolution smaller than 1920x1080
+
 0.6.5.1
 - Added sprite images to items and obstacles

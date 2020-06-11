@@ -132,6 +132,10 @@ def check_name(name):
             print("Warning: Obj name " + name + " changed to " + new_name)
     return new_name                     # Returns the name found
 
+# Removes passed name from obj_names
+def remove_name(name):
+    if name in obj_names:
+        obj_names.remove(name)
 
 # Function that adds points based on distance covered
 def score_distance(player_pos, progress):

@@ -5,7 +5,6 @@ from Sprites import *
 from MenuObjs import *
 import os
 import ctypes
-import pygame.freetype
 pygame.init()
 from Images import *
 import platform
@@ -371,6 +370,12 @@ def buildLevel(map, metadata, tile_dim, Groups):
                 for Group in (Drawables, Collidables):
                     Group.add(enemy)
 
+# Removes all the objects in the passed Groups and their names
+def destroyLevel(Groups):
+    for group in Groups:
+        for obj in group:
+            obj.kill()
+
 # Procedure that applies the settings passed into it
 def apply_settings(settings):
     global resolution
@@ -530,6 +535,9 @@ if __name__ == "__main__":
         if pygame.K_F6 in inputs["key"]:
             pygame.display.set_mode(resolution)
             inputs["key"].remove(pygame.K_F6)
+        if pygame.K_1 in inputs["key"]:
+            add_money(1000)
+            inputs["key"].remove(pygame.K_1)
 
         # Main Menu screen
         if mode == "main":
@@ -663,10 +671,6 @@ if __name__ == "__main__":
         elif mode == "play":
             # Initialises game
             if not game_init:
-                Drawables = pygame.sprite.LayeredUpdates()
-                playerGroup = pygame.sprite.GroupSingle()
-                Collidables = pygame.sprite.Group()
-                Platforms = pygame.sprite.Group()
                 playerSprite = playerClass("player", player_x, player_y, 32, 48, RED, health, player_accel,
                                            ((max_dx, min_dx), (max_dy, min_dy)), 1, 0.4)
                 # Represents the area of the course
@@ -847,6 +851,7 @@ if __name__ == "__main__":
                     dlvl = menu_lvls[trait] - current_lvls[trait]
                     if dlvl > 0:
                         playerSprite.upgrade_trait(trait, dlvl)
+                destroyLevel((Drawables, Collidables, Platforms))
                 mode = "play"                   # Transistions back to the game
                 shop_init = False               # De-initialises shop menu
             # Drawing code
@@ -877,6 +882,7 @@ if __name__ == "__main__":
 
         # The game over procedure is called when the player's health is zero or lower
         elif mode == "lose":
+            destroyLevel((Drawables, playerGroup, Collidables, Platforms))
             option = game_over()
             if option == "main":
                 mode = "main"
@@ -899,6 +905,7 @@ if __name__ == "__main__":
 
         # Handles when the player has won the game
         elif mode == "win":
+            destroyLevel((Drawables, playerGroup, Collidables, Platforms))
             game_win()
             if pygame.K_RETURN in inputs["key"]:
                 mode = "main"

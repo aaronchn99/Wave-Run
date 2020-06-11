@@ -1,7 +1,5 @@
 from variables import *
 from Sprites import Entity
-import pygame.freetype
-pygame.freetype.init()
 p_speed = 5
 
 

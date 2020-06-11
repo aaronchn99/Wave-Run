@@ -87,6 +87,12 @@ class Entity(pygame.sprite.Sprite):
 
 
 
+    def kill(self):
+        remove_name(self._name)
+        super().kill()
+
+
+
 
 # Platform class for collidable platforms (Inherits Entity)
 class Platform(Entity):
@@ -632,13 +638,13 @@ class playerClass(Character):
             if trait == "hp":
                 self._max_hp += 1
             elif trait == "speed":
-                self._max_dx = self._max_dx * 1.5
-                self._min_dx = self._min_dx * 1.5
+                self._max_dx = self._max_dx * 1.09
+                self._min_dx = self._min_dx * 1.09
             elif trait == "acc":
-                self._accel = self._accel * 1.5
+                self._accel = self._accel * 1.1
                 self._start_values[0] = self._accel
             elif trait == "str":
-                self._sp = self._sp * 2
+                self._sp = self._sp * 1.2
             elif trait == "def":
                 self._ap += 0.05
             else:
