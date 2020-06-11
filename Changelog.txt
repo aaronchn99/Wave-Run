@@ -1,0 +1,2 @@
+0.6.5.1
+- Added sprite images to items and obstacles
