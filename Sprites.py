@@ -389,21 +389,20 @@ class playerClass(Character):
         for platform in Platforms:
             platform_list.append(platform.rect)
 
-
+        dt = Clock.get_time()/1000
         ''' Horizontal movement '''
         if left_key in inputs["key"]:
             if self._dx > 0:
                 self._dx = 0                # If the player was moving to the right, the player is stopped
             elif self._dx > self._min_dx:
-                self._dx -= self._accel     # Otherwise, the player accelerates to the left
+                self._dx -= self._accel * dt     # Otherwise, the player accelerates to the left
             elif self._dx <= self._min_dx:
                 self._dx = self._min_dx     # Sets player speed to the maximum speed if it exceeds it
         if right_key in inputs["key"]:
             if self._dx < 0:
                 self._dx = 0                # If the player is moving to the left, it stops
             elif self._dx < self._max_dx:
-                self._dx += self._accel     # Otherwise, the player is accelerated to the right
-
+                self._dx += self._accel * dt     # Otherwise, the player is accelerated to the right
             elif self._dx >= self._max_dx:
                 self._dx = self._max_dx     # Sets player speed to the maximum speed if it exceeds it
 
@@ -413,7 +412,7 @@ class playerClass(Character):
         # Likewise, if left and right keys are pressed, the player stops moving horizontally
         elif left_key in inputs["key"] and right_key in inputs["key"]:
             self._dx = 0
-        self.move_to(self._x + self._dx, self._y)       # The horizontal movement is applied
+        self.move_to(self._x + self._dx * dt, self._y)       # The horizontal movement is applied
 
         # Collision code
         for platform in platform_list:      # Iterates through each platform rect
@@ -442,14 +441,14 @@ class playerClass(Character):
         else:                                                       # If jump key not pressed or player can't jump
             self._hold_duration = 0                                 # Hold duration set to 0
             if self._dy < self._max_dy and Ghost.collidelist(platform_list) == -1:
-                self._dy += g                                       # Player falls if not on platform
+                self._dy += g * dt                                       # Player falls if not on platform
 
         # If player on platform and jump key not pressed, hold duration is reset and player can jump
-        if Ghost.move(0, self._dy).collidelist(platform_list) != -1 and jump_key not in inputs["key"]:
+        if Ghost.move(0, self._dy * dt).collidelist(platform_list) != -1 and jump_key not in inputs["key"]:
             self._hold_duration = 350
             self._can_jump = True
 
-        self.move_to(self._x, self._y + self._dy)           # Vertical movement is applied
+        self.move_to(self._x, self._y + self._dy * dt)           # Vertical movement is applied
 
         # Collision code
         for platform in platform_list:
@@ -457,7 +456,7 @@ class playerClass(Character):
             if self._dy < 0 and self.rect.colliderect(platform):
                 new_y = platform.bottom                     # Player moved to bottom of platform
                 self.move_to(self._x, new_y)
-                self.set_vel(self._dx, g)                   # Player set to fall
+                self.set_vel(self._dx, g * dt)                   # Player set to fall
             # If the player is moving downwards and overlapping the platform
             elif self._dy > 0 and self.rect.colliderect(platform):
                 new_y = platform.top - self.rect.height     # Player set to top of platform

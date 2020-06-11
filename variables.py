@@ -29,14 +29,14 @@ money = 0
 score = 0
 health = 2
 # Physics constants and variables
-player_accel = 0.2
-max_dy = 6
-min_dy = -6
-max_dx = 7
-min_dx = -7
+player_accel = 720
+max_dy = 360
+min_dy = -360
+max_dx = 420
+min_dx = -420
 player_x = 960
 player_y = 354
-g = 0.4
+g = 1440
 # Declaring colour constants
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
@@ -139,7 +139,7 @@ def score_distance(player_pos, progress):
     tile_pos = int(player_pos/tile_dim[0])      # Calculates player position in tiles
     if tile_pos > progress:
         dx = tile_pos - progress                # Change in tile distance
-        score += 10 * dx                        # Adds 10 times dx points
+        score += 5 * dx                        # Adds 10 times dx points
         progress += dx                          # Adds change in tile distance to progress
     return progress                             # Returns progress
 
