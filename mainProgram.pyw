@@ -44,7 +44,7 @@ class Camera(object):
 
 
     def set_scroll(self, player):
-        self._vel = player.set_scroll(resolution)
+        self._vel = player.set_scroll(native_res)
         self.checkOnBoundary()
 
 
@@ -87,15 +87,15 @@ class HUD(object):
     # Constructs the HUD for the first time
     def __init__(self, health, max_hp, money, score):
         # HUD background is rendered
-        self.background = pygame.Surface((resolution[0], int(resolution[1]*(200/1080))))
+        self.background = pygame.Surface((1920, 200))
         self.background.fill(BLACK)
         # Using the font loaded in the loading procedure, Text objects are set up and rendered
         # first for the variable labels
-        self.hpLabel = res_scale(subFont.render("Hearts", False, WHITE))
-        self.moneyLabel = res_scale(subFont.render("Gold", False, WHITE))
-        self.scoreLabel = res_scale(subFont.render("Score", False, WHITE))
-        self.effectLabel = res_scale(subFont.render("Effects", False, WHITE))
-        self.progressLabel = res_scale(subFont.render("Course", False, WHITE))
+        self.hpLabel = subFont.render("Hearts", False, WHITE)
+        self.moneyLabel = subFont.render("Gold", False, WHITE)
+        self.scoreLabel = subFont.render("Score", False, WHITE)
+        self.effectLabel = subFont.render("Effects", False, WHITE)
+        self.progressLabel = subFont.render("Course", False, WHITE)
         # The update function is called to render Text objects to show initial score and money
         # values and a list of Rects to represent the initial health
         self.hud_update(health, max_hp, money, score, [], 0)
@@ -133,15 +133,15 @@ class HUD(object):
             effectList.append(effect[0])
         self.effect_list = effectList
         # Creates progress bar as one Surface
-        self.progressBar = pygame.Surface((int(1528*scale_f), int(42*scale_f)))
-        self.progressBar.fill(WHITE, pygame.Rect(int(0*xpos_f), int(0*ypos_f), int(14*scale_f), int(42*scale_f)))
-        self.progressBar.fill(WHITE, pygame.Rect(int(1514*xpos_f), int(0*ypos_f), int(14*scale_f), int(42*scale_f)))
-        self.progressBar.fill(WHITE, pygame.Rect(int(14*xpos_f), int(15*ypos_f), int(1500*scale_f), int(6*scale_f)))
-        self.progressBar.fill(RED, pygame.Rect(round(1514 * progress * xpos_f, 0), int(0*ypos_f), int(28*scale_f), int(42*scale_f)))
+        self.progressBar = pygame.Surface((1528, 42))
+        self.progressBar.fill(WHITE, pygame.Rect(0, 0, 14, 42))
+        self.progressBar.fill(WHITE, pygame.Rect(1514, 0, 14, 42))
+        self.progressBar.fill(WHITE, pygame.Rect(14, 15, 1500, 6))
+        self.progressBar.fill(RED, pygame.Rect(round(1514 * progress, 0), 0, 28, 42))
         # The Text object showing the current money and score values are rendered, taking the
         # money and score arguments in string data type
-        self.moneyValue = subFontRes.render(str(money), YELLOW)[0]
-        self.scoreValue = subFontRes.render(str(score), WHITE)[0]
+        self.moneyValue = subFont.render(str(money), False, YELLOW)
+        self.scoreValue = subFont.render(str(score), False, WHITE)
 
 
 
@@ -150,89 +150,83 @@ class HUD(object):
         # The image of the HUD background is drawn on the window
         screen.blit(self.background, (0, 0))
         # The Hearts label is drawn
-        screen.blit(self.hpLabel, (int(177*xpos_f), int(10*ypos_f)))
+        screen.blit(self.hpLabel, (177, 10))
         # The list of hearts to be drawn is put together as one Surface object and centre-aligned
         # with the "Hearts" label.
         if self.Hearts != []:
-            Heart1 = res_scale(crop(HeartSheet, (0, 0), (70, 65)))
-            Heart2 = res_scale(crop(HeartSheet, (70, 0), (70, 65)))
-            Heart3 = res_scale(crop(HeartSheet, (140, 0), (70, 65)))
-            Heart4 = res_scale(crop(HeartSheet, (210, 0), (70, 65)))
-            Heart5 = res_scale(crop(HeartSheet, (280, 0), (70, 65)))
+            Heart1 = crop(HeartSheet, (0, 0), (70, 65))
+            Heart2 = crop(HeartSheet, (70, 0), (70, 65))
+            Heart3 = crop(HeartSheet, (140, 0), (70, 65))
+            Heart4 = crop(HeartSheet, (210, 0), (70, 65))
+            Heart5 = crop(HeartSheet, (280, 0), (70, 65))
             arrange = self.Hearts
-            heartRect = pygame.Rect((0, 0), (int(70*scale_f), int(65*scale_f)))
+            heartRect = pygame.Rect((0, 0), (70, 65))
             for i in range(1, len(arrange)):
-                heartRect = heartRect.union(pygame.Rect((int(73 * xpos_f * i), 0), (int(70*scale_f), int(65*scale_f))))
-            heart_x = self.hpLabel.get_rect(topleft=(int(177*xpos_f), int(10*ypos_f))).midbottom[0]
-            heart_y = self.hpLabel.get_rect(topleft=(int(177*xpos_f), int(10*ypos_f))).midbottom[1] + int(8*ypos_f)
+                heartRect = heartRect.union(pygame.Rect((73 * i, 0), (70, 65)))
+            heart_x = self.hpLabel.get_rect(topleft=(177, 10)).midbottom[0]
+            heart_y = self.hpLabel.get_rect(topleft=(177, 10)).midbottom[1] + 8
             heartRect.midtop = (heart_x, heart_y)
             Hearts = pygame.Surface((heartRect.width, heartRect.height))
             for i in range(len(arrange)):
                 if arrange[i] == 1:
-                    Hearts.blit(Heart1, (int(73 * xpos_f * i), 0))
+                    Hearts.blit(Heart1, (73 * i, 0))
                 elif arrange[i] == 2:
-                    Hearts.blit(Heart2, (int(73 * xpos_f * i), 0))
+                    Hearts.blit(Heart2, (73 * i, 0))
                 elif arrange[i] == 3:
-                    Hearts.blit(Heart3, (int(73 * xpos_f * i), 0))
+                    Hearts.blit(Heart3, (73 * i, 0))
                 elif arrange[i] == 4:
-                    Hearts.blit(Heart4, (int(73 * xpos_f * i), 0))
+                    Hearts.blit(Heart4, (73 * i, 0))
                 elif arrange[i] == 5:
-                    Hearts.blit(Heart5, (int(73 * xpos_f * i), 0))
+                    Hearts.blit(Heart5, (73 * i, 0))
             screen.blit(Hearts, heartRect.topleft)
         # The "Gold" label is drawn
-        screen.blit(self.moneyLabel, (int(1210*xpos_f), int(10*ypos_f)))
+        screen.blit(self.moneyLabel, (1210, 10))
         # The Text that shows the money amount is drawn next to the Gold label
-        pos = list(self.moneyLabel.get_rect(topleft=(int(1210*xpos_f), int(10*ypos_f))).topright)
-        pos[0] = pos[0] + int(40*xpos_f)
+        pos = list(self.moneyLabel.get_rect(topleft=(1210, 10)).topright)
+        pos[0] = pos[0] + 40
         screen.blit(self.moneyValue, pos)
         # The "Score" label is drawn
-        screen.blit(self.scoreLabel, (int(1210*xpos_f), int(60*ypos_f)))
+        screen.blit(self.scoreLabel, (1210, 60))
         # Similar to the money amount text, the score value text is drawn next to the Score label
-        pos = list(self.scoreLabel.get_rect(topleft=(int(1210*xpos_f), int(60*ypos_f))).topright)
-        pos[0] = pos[0] + int(40*xpos_f)
+        pos = list(self.scoreLabel.get_rect(topleft=(1210, 60)).topright)
+        pos[0] = pos[0] + 40
         screen.blit(self.scoreValue, pos)
         # Draws the Effects label
-        screen.blit(self.effectLabel, (int(720*xpos_f), int(10*ypos_f)))
+        screen.blit(self.effectLabel, (720, 10))
         # The list of effect sprites to be drawn is put together as one Surface object and centre-aligned
         # with the Effects label.
         effect_list = self.effect_list
         if effect_list != []:
-            fastSprite = res_scale(crop(EffectSheet, (0, 0), (65, 65)))
-            slowSprite = res_scale(crop(EffectSheet, (65, 0), (65, 65)))
-            koSprite = res_scale(crop(EffectSheet, (130, 0), (65, 65)))
-            confuseSprite = res_scale(crop(EffectSheet, (195, 0), (65, 65)))
-            cannonSprite = res_scale(crop(EffectSheet, (260, 0), (65, 65)))
-            shipSprite = res_scale(crop(EffectSheet, (325, 0), (65, 65)))
+            fastSprite = crop(EffectSheet, (0, 0), (65, 65))
+            slowSprite = crop(EffectSheet, (65, 0), (65, 65))
+            koSprite = crop(EffectSheet, (130, 0), (65, 65))
+            confuseSprite = crop(EffectSheet, (195, 0), (65, 65))
+            cannonSprite = crop(EffectSheet, (260, 0), (65, 65))
+            shipSprite = crop(EffectSheet, (325, 0), (65, 65))
             spriteRect = fastSprite.get_rect()
             for i in range(1, len(effect_list)):
-                spriteRect = spriteRect.union(fastSprite.get_rect(topleft=(int(70 * xpos_f * i), 0)))
-            x = self.effectLabel.get_rect(topleft=(int(720*xpos_f), int(10*ypos_f))).midbottom[0]
-            y = self.effectLabel.get_rect(topleft=(int(720*xpos_f), int(10*ypos_f))).midbottom[1] + int(8*ypos_f)
+                spriteRect = spriteRect.union(fastSprite.get_rect(topleft=(70 * i, 0)))
+            x = self.effectLabel.get_rect(topleft=(720, 10)).midbottom[0]
+            y = self.effectLabel.get_rect(topleft=(720, 10)).midbottom[1] + 8
             spriteRect.midtop = (x, y)
             effectSurf = pygame.Surface(spriteRect.size)
             for i in range(len(effect_list)):
                 if effect_list[i] == "fast":
-                    effectSurf.blit(fastSprite, (int(70 * xpos_f * i), 0))
+                    effectSurf.blit(fastSprite, (70 * i, 0))
                 elif effect_list[i] == "slow":
-                    effectSurf.blit(slowSprite, (int(70 * xpos_f * i), 0))
+                    effectSurf.blit(slowSprite, (70 * i, 0))
                 elif effect_list[i] == "knockout":
-                    effectSurf.blit(koSprite, (int(70 * xpos_f * i), 0))
+                    effectSurf.blit(koSprite, (70 * i, 0))
             screen.blit(effectSurf, spriteRect.topleft)
         # Draws the progress label
-        screen.blit(self.progressLabel, (int(55*xpos_f), int(140*ypos_f)))
+        screen.blit(self.progressLabel, (55, 140))
         # Draws the progress bar next to the label
-        screen.blit(self.progressBar, (int(337*xpos_f), int(140*ypos_f)))
+        screen.blit(self.progressBar, (337, 140))
 
 
 
 
 ''' Procedures and Functions '''
-# Scales Surface objects depending on the set resolution
-def res_scale(surf):
-    old_size = surf.get_size()
-    new_size = (int(old_size[0]*scale_f), int(old_size[1]*scale_f))
-    return pygame.transform.scale(surf, new_size)
-
 # Crops an image with the specified position of the top left corner and the area
 def crop(Image, pos, area):
     crop_area = pygame.Surface(area, pygame.SRCALPHA)
@@ -251,17 +245,17 @@ def game_over():
 # Procedure that runs the level transition
 def lvl_clear(inputs):
     # First, the window is filled white
-    Window.fill(WHITE)
+    Frame.fill(WHITE)
     # Game objects and sprites are drawn next
-    Drawables.draw(Window)
+    Drawables.draw(Frame)
     playerSprite.update({"key": [right_key]}, (), Platforms, playerGroup)
-    winText = headerFontRes.render("Level Clear", GREEN)[0]
-    continueText = subFontRes.render("Press any key to continue", GREEN)[0]
-    pos = winText.get_rect(center=(int(resolution[0] / 2), int(resolution[1] / 2))).topleft
-    Window.blit(winText, pos)
-    pos = continueText.get_rect(center=(int(resolution[0] / 2), int(resolution[1] / 2 + (100*ypos_f)))).topleft
-    if playerSprite.get_pos()[0] >= resolution[0]:
-        Window.blit(continueText, pos)
+    winText = headerFont.render("Level Clear", False, GREEN)
+    continueText = subFont.render("Press any key to continue", False, GREEN)
+    pos = winText.get_rect(center=(int(native_res[0] / 2), int(native_res[1] / 2))).topleft
+    Frame.blit(winText, pos)
+    pos = continueText.get_rect(center=(int(native_res[0] / 2), int(native_res[1] / 2 + 100))).topleft
+    if playerSprite.get_pos()[0] >= native_res[0]:
+        Frame.blit(continueText, pos)
         if inputs["key"] != []:
             inputs["key"] = []
             return True
@@ -270,13 +264,13 @@ def lvl_clear(inputs):
 
 # Handles game win procedure
 def game_win():
-    Window.fill(WHITE)
-    winText = headerFontRes.render("You win", GREEN)[0]
-    continueText = subFontRes.render("Press enter to go back to main menu", GREEN)[0]
-    pos = winText.get_rect(center=(int(resolution[0] / 2), int(resolution[1] / 2))).topleft
-    Window.blit(winText, pos)
-    pos = continueText.get_rect(center=(int(resolution[0] / 2), int(resolution[1] / 2 + (100*ypos_f)))).topleft
-    Window.blit(continueText, pos)
+    Frame.fill(WHITE)
+    winText = headerFont.render("You win", False, GREEN)
+    continueText = subFont.render("Press enter to go back to main menu", False, GREEN)
+    pos = winText.get_rect(center=(int(native_res[0] / 2), int(native_res[1] / 2))).topleft
+    Frame.blit(winText, pos)
+    pos = continueText.get_rect(center=(int(native_res[0] / 2), int(native_res[1] / 2 + 100))).topleft
+    Frame.blit(continueText, pos)
 
 # Loads the data needed for a level from a level data file. It separates the
 # data into 2 parts: mapping array and metadata and returns them
@@ -380,7 +374,6 @@ def buildLevel(map, metadata, tile_dim, Groups):
 # Procedure that applies the settings passed into it
 def apply_settings(settings):
     global resolution
-    global scale_f
     global xpos_f
     global ypos_f
     # Changes scale and position factors depending on resolution
@@ -388,17 +381,7 @@ def apply_settings(settings):
     resolution = (int(temp_list[0]), int(temp_list[1]))
     xpos_f = resolution[0]/1920
     ypos_f = resolution[1]/1080
-    scale_f = min((xpos_f, ypos_f))
-    for obj in gui_list:
-        if type(obj) == Menu:
-            obj.update_res(scale_f, xpos_f, ypos_f, resolution)
-        else:
-            obj.update_res(scale_f, xpos_f, ypos_f)
-    update_res(scale_f, xpos_f, ypos_f)
-    global subFontRes
-    global headerFontRes
-    subFontRes = pygame.freetype.Font("PressStart2P.ttf", int(37 * scale_f))
-    headerFontRes = pygame.freetype.Font("PressStart2P.ttf", int(107 * scale_f))
+    set_scale(xpos_f, ypos_f)
     # Turns on or off fullscreen
     global Window
     if settings["fullscreen"] == True:
@@ -410,10 +393,8 @@ if __name__ == "__main__":
     ''' Loading Procedure '''
     # Loading the Arcade Classic font at font size 42
     subFont = pygame.font.Font("PressStart2P.ttf", 42)
-    subFontRes = pygame.freetype.Font("PressStart2P.ttf", int(37*scale_f))
     # Loads the same font, but large for headers
     headerFont = pygame.font.Font("PressStart2P.ttf", 120)
-    headerFontRes = pygame.freetype.Font("PressStart2P.ttf", int(107*scale_f))
     # Loads the hearts sprite sheet
     HeartSheet = pygame.image.load("images\Hearts.png")
     # Loads the
@@ -440,7 +421,7 @@ if __name__ == "__main__":
         "F": {"left": "F", "right": "F", "up": "E", "down": "G", "obj name": "setting"},
         "G": {"left": "G", "right": "G", "up": "F", "down": "A", "obj name": "quit"}
         }, pointerSurf=blackRightArrow)
-    unavailableText = subFontRes.render("This feature is not yet available", BLACK)[0]
+    unavailableText = subFont.render("This feature is not yet available", False, BLACK)
 
     Settings = Menu("settings menu", [
         Image("setting title", 144, 67, settingsTitle),
@@ -465,10 +446,10 @@ if __name__ == "__main__":
         Button("default", 800, 947, inactiveDefaultButton, activeDefaultButton, pressDefaultButton),
         Button("apply", 1170, 947, inactiveApplyButton, activeApplyButton, pressApplyButton),
         Button("back", 1543, 947, inactiveBackButton, activeBackButton, pressBackButton),
-        DropMenu("res list", 700, 315, subFontRes, avail_resmodes, lineSurf,
+        DropMenu("res list", 700, 315, subFont, avail_resmodes, lineSurf,
                  sliderPointerSurfV, slideSurfV, current_index=avail_resmodes.index(default_settings["resolution"]),
                  lines=9),
-        DropMenu("difficulty list", 1259, 769, subFontRes, ["Easy", "Normal", "Hard", "Extreme"], lineSurf,
+        DropMenu("difficulty list", 1259, 769, subFont, ["Easy", "Normal", "Hard", "Extreme"], lineSurf,
                  sliderPointerSurfV, slideSurfV)
     ], {
         "A": {"left": "B", "right": "B", "up": "I", "down": "C", "obj name": "res list"},
@@ -524,9 +505,9 @@ if __name__ == "__main__":
         Image("lose title", 428, 488, headerFont.render("Game Over", False, WHITE))
     ], {"A": {"left": "B", "right": "B", "up": "A", "down": "A", "obj name": "main button"},
         "B": {"left": "A", "right": "A", "up": "B", "down": "B", "obj name": "retry button"}
-        }, pygame.Surface(resolution), pointerSurf=greenRightArrow)
+        }, pygame.Surface(native_res), pointerSurf=greenRightArrow)
 
-    pauseButton = Button("pause", round(1880*xpos_f), 0, pauseButtonSurf, pauseButtonSurf, pauseButtonSurf)
+    pauseButton = Button("pause", 1880, 0, pauseButtonSurf, pauseButtonSurf, pauseButtonSurf)
 
     gui_list = [Main, Settings, Shop, loseMenu, pauseButton]
     # Updates settings
@@ -576,7 +557,7 @@ if __name__ == "__main__":
                     tell = True
             Main.draw()     # All objects in main menu are drawn
             if tell:
-                Window.blit(unavailableText, (0, int(1030*ypos_f)))
+                Frame.blit(unavailableText, (0, 1030))
 
         # Settings menu
         elif mode == "settings":
@@ -655,28 +636,28 @@ if __name__ == "__main__":
             # Drawing code
             Settings.draw()
             if action_bind == "left":
-                label = subFontRes.render(str(int(bind_time/1000)+1)+"...", BLACK)[0]
+                label = subFont.render(str(int(bind_time/1000)+1)+"...", False, BLACK)
             else:
-                label = subFontRes.render(pygame.key.name(settings_dict["left key"]), BLACK)[0]
+                label = subFont.render(pygame.key.name(settings_dict["left key"]), False, BLACK)
             pos = list(label.get_rect(midleft=Settings.find_obj("set left button").rect.midleft).topleft)
-            pos[0] += 10*xpos_f
-            Window.blit(label, pos)
+            pos[0] += 10
+            Frame.blit(label, pos)
             if action_bind == "right":
-                label = subFontRes.render(str(int(bind_time/1000)+1)+"...", BLACK)[0]
+                label = subFont.render(str(int(bind_time/1000)+1)+"...", False, BLACK)
             else:
-                label = subFontRes.render(pygame.key.name(settings_dict["right key"]), BLACK)[0]
+                label = subFont.render(pygame.key.name(settings_dict["right key"]), False, BLACK)
             pos = list(label.get_rect(midleft=Settings.find_obj("set right button").rect.midleft).topleft)
-            pos[0] += 10*xpos_f
-            Window.blit(label, pos)
+            pos[0] += 10
+            Frame.blit(label, pos)
             if action_bind == "jump":
-                label = subFontRes.render(str(int(bind_time / 1000) + 1)+"...", BLACK)[0]
+                label = subFont.render(str(int(bind_time / 1000) + 1)+"...", False, BLACK)
             else:
-                label = subFontRes.render(pygame.key.name(settings_dict["jump key"]), BLACK)[0]
+                label = subFont.render(pygame.key.name(settings_dict["jump key"]), False, BLACK)
             pos = list(label.get_rect(midleft=Settings.find_obj("set jump button").rect.midleft).topleft)
-            pos[0] += 10 * xpos_f
-            Window.blit(label, pos)
-            note = subFontRes.render("Note: Currently no sound or difficulty settings", BLACK)[0]
-            Window.blit(note, (int(10*xpos_f), resolution[1] - note.get_height()))
+            pos[0] += 10
+            Frame.blit(label, pos)
+            note = subFont.render("Note: Currently no sound or difficulty settings", False, BLACK)
+            Frame.blit(note, (10, native_res[1] - note.get_height()))
 
         # Gameplay mode
         elif mode == "play":
@@ -689,20 +670,21 @@ if __name__ == "__main__":
                 playerSprite = playerClass("player", player_x, player_y, 32, 48, RED, health, player_accel,
                                            ((max_dx, min_dx), (max_dy, min_dy)), 1, 0.4)
                 # Represents the area of the course
-                CourseArea = pygame.Rect(0, 0, 1.5 * resolution[0], resolution[1])
+                CourseArea = pygame.Rect(0, 0, 1.5 * native_res[0], native_res[1])
                 # Represents the level clear area
-                EndArea = pygame.Rect(1920, 0, 0.5 * resolution[0], resolution[1])
+                EndArea = pygame.Rect(1920, 0, 0.5 * native_res[0], native_res[1])
                 # Resetting money and score
                 reset_money_score()
                 # Initialising the HUD's image list
                 Hud = HUD(playerSprite.get_hp(), playerSprite.get_max_hp(), get_money(), get_points())
                 # Camera object that allows the screen to scroll across the course
-                GameCam = Camera(resolution, (10, 10))
+                GameCam = Camera(native_res, (10, 10))
                 # Create game images
-                Overlay = pygame.Surface(resolution)
+                Overlay = pygame.Surface(native_res)
                 Overlay.set_alpha(128)
-                pauseText, pauseRect = headerFontRes.render("Paused", RED)
-                pauseRect.center = (round(resolution[0] / 2), round(resolution[1] / 2))
+                pauseText = headerFont.render("Paused", False, RED)
+                pauseRect = pauseText.get_rect()
+                pauseRect.center = (round(native_res[0] / 2), round(native_res[1] / 2))
                 game_init = True
 
             # Constructs a new level when not already loaded
@@ -722,7 +704,7 @@ if __name__ == "__main__":
                 Wave = Tsunami("wave", -length*tile_dim[0], 0, length*tile_dim[0], height*tile_dim[0], BLUE, 5, 5000)
                 Drawables.add(Wave)
                 Collidables.add(Wave)
-                GameCam = Camera(resolution, (length*tile_dim[0], height*tile_dim[1]))
+                GameCam = Camera(native_res, (length*tile_dim[0], height*tile_dim[1]))
                 tile_progress = 0
                 loaded = True
 
@@ -776,15 +758,15 @@ if __name__ == "__main__":
                         playerSprite.set_opponent(None)
                         combat_init = False
                     # Drawing code
-                    KeySignal = headerFontRes.render(chr(attack_key).upper(), YELLOW)[0]
-                    Back = pygame.Rect((0, 0), (int(200*scale_f), int(150*scale_f)))
-                    Back.center = KeySignal.get_rect(topleft=(int(960*xpos_f-int(KeySignal.get_width()/2)), int(400*ypos_f))).center
-                    CombatBar = pygame.Surface((int(800*scale_f), int(50*scale_f)))
-                    progress_pos = int(800*((player_hp+progress)/(player_hp+enemy_hp))*scale_f)
-                    neutral_pos = int(800*(player_hp/(player_hp+enemy_hp))*scale_f)
+                    KeySignal = headerFont.render(chr(attack_key).upper(), False, YELLOW)
+                    Back = pygame.Rect((0, 0), (200, 150))
+                    Back.center = KeySignal.get_rect(topleft=(960-int(KeySignal.get_width()/2), 400)).center
+                    CombatBar = pygame.Surface((800, 50))
+                    progress_pos = int(800*((player_hp+progress)/(player_hp+enemy_hp)))
+                    neutral_pos = int(800*(player_hp/(player_hp+enemy_hp)))
                     CombatBar.fill(RED)
-                    CombatBar.fill(WHITE, pygame.Rect(neutral_pos-1, 0, 2, int(50*scale_f)))
-                    Pointer = pygame.Rect(int(560*xpos_f+progress_pos-1), int(580*ypos_f), 2, int(70*ypos_f))
+                    CombatBar.fill(WHITE, pygame.Rect(neutral_pos-1, 0, 2, 50))
+                    Pointer = pygame.Rect(560+progress_pos-1, 580, 2, 70)
                 if pygame.K_ESCAPE in inputs["key"]:
                     pause = True
                     inputs["key"].remove(pygame.K_ESCAPE)
@@ -802,20 +784,20 @@ if __name__ == "__main__":
 
             ''' Output Procedure '''
             # First, the window is filled white
-            Window.fill(WHITE)
+            Frame.fill(WHITE)
             # Game objects and sprites are drawn next
-            Drawables.draw(Window)
+            Drawables.draw(Frame)
             # Finally, the HUD is drawn
-            Hud.draw_hud(Window)
+            Hud.draw_hud(Frame)
             pauseButton.draw()
             if combat_init == True:
-                pygame.draw.rect(Window, BLUE, Back)
-                Window.blit(KeySignal, (int(960*xpos_f-int(KeySignal.get_width()/2)), int(400*ypos_f)))
-                Window.blit(CombatBar, (int(560*xpos_f), int(600*ypos_f)))
-                pygame.draw.rect(Window, BLACK, Pointer)
+                pygame.draw.rect(Frame, BLUE, Back)
+                Frame.blit(KeySignal, (960-int(KeySignal.get_width()/2), 400))
+                Frame.blit(CombatBar, (560, 600))
+                pygame.draw.rect(Frame, BLACK, Pointer)
             if pause:
-                Window.blit(Overlay, (0,0))
-                Window.blit(pauseText, pauseRect.topleft)
+                Frame.blit(Overlay, (0,0))
+                Frame.blit(pauseText, pauseRect.topleft)
                 pauseButton.draw()
 
         # Upgrade shop
@@ -826,7 +808,7 @@ if __name__ == "__main__":
                 current_lvls = playerSprite.get_trait_lvls()        # Initial trait levels
                 menu_lvls = current_lvls.copy()                     # Trait lvls shown on shop menu
                 money_left = get_money()                            # Money left on upgrading traits
-                bar_width = Shop.find_obj("hp up").rect.left - Shop.find_obj("hp down").rect.right - round(90 * xpos_f)
+                bar_width = Shop.find_obj("hp up").rect.left - Shop.find_obj("hp down").rect.right - 90
                 bar_height = Shop.find_obj("hp down").rect.height
                 whiteBar = pygame.Surface((bar_width, bar_height))
                 whiteBar.fill(WHITE)
@@ -874,24 +856,24 @@ if __name__ == "__main__":
                 marker.fill(BLACK)
                 whiteBar.blit(marker, (round((bar_width/8)*i), 0))
             for trait in list(menu_lvls.keys()):
-                xpos = Shop.find_obj(trait + " down").rect.right + round(20*xpos_f)
+                xpos = Shop.find_obj(trait + " down").rect.right + 20
                 ypos = Shop.find_obj(trait + " down").get_pos()[1]
-                Window.blit(whiteBar, (xpos, ypos))
-                redBar = pygame.Surface((round((bar_width/8)*menu_lvls[trait]), round((bar_height*(7/9))*ypos_f)))
+                Frame.blit(whiteBar, (xpos, ypos))
+                redBar = pygame.Surface((round((bar_width/8)*menu_lvls[trait]), (bar_height*(7/9))))
                 redBar.fill(RED)
-                Window.blit(redBar, (xpos, ypos+round(5*ypos_f)))
-                xpos = Shop.find_obj(trait + " up").rect.right + round(20*xpos_f)
+                Frame.blit(redBar, (xpos, ypos+5))
+                xpos = Shop.find_obj(trait + " up").rect.right + 20
                 if menu_lvls[trait] < 8:
-                    priceText = subFontRes.render(str(prices[trait]), YELLOW)[0]
-                    Window.blit(priceText, (xpos, ypos))
+                    priceText = subFont.render(str(prices[trait]), False, YELLOW)
+                    Frame.blit(priceText, (xpos, ypos))
                 elif menu_lvls[trait] == 8:
-                    maxText = subFontRes.render("Max", YELLOW)[0]
-                    Window.blit(maxText, (xpos, ypos))
+                    maxText = subFont.render("Max", False, YELLOW)
+                    Frame.blit(maxText, (xpos, ypos))
             # Draws the text showing money left to spend
-            moneyLeftTxt = subFontRes.render(str(money_left), YELLOW)[0]
+            moneyLeftTxt = subFont.render(str(money_left), False, YELLOW)
             goldLabelRect = Shop.find_obj("gold").rect
-            pos = (goldLabelRect.right + round(10*xpos_f), goldLabelRect.y)
-            Window.blit(moneyLeftTxt, pos)
+            pos = (goldLabelRect.right + 10, goldLabelRect.y)
+            Frame.blit(moneyLeftTxt, pos)
 
         # The game over procedure is called when the player's health is zero or lower
         elif mode == "lose":
@@ -923,8 +905,10 @@ if __name__ == "__main__":
                 inputs["key"].remove(pygame.K_RETURN)
 
         # Shows fps
-        fps = subFontRes.render(str(int(Clock.get_fps())), GREEN, BLACK)[0]
-        Window.blit(fps, (0, 0))
+        fps = subFont.render(str(int(Clock.get_fps())), False, GREEN, BLACK)
+        Frame.blit(fps, (0, 0))
+        FrameToRender = pygame.transform.scale(Frame, resolution)
+        Window.blit(FrameToRender, (0,0))
         # The window is updated
         pygame.display.flip()
         # Clock object restricts the game to the set ticks per second

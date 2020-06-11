@@ -15,12 +15,13 @@ while i < len(avail_resmodes):
     else:
         i += 1
 resolution = (pygame.display.Info().current_w, pygame.display.Info().current_h)
+native_res = (1920, 1080)
 ticks = 60
 Window = pygame.display.set_mode(resolution, pygame.FULLSCREEN)
+Frame = pygame.Surface(native_res)
 pygame.display.set_caption(window_name)
 Clock = pygame.time.Clock()
 tile_dim = (40, 40)
-scale_f = 1.0
 xpos_f = 1.0
 ypos_f = 1.0
 # Gameplay variables
@@ -81,7 +82,7 @@ obj_names = []
 '''Functions'''
 # Procedure that gets inputs from queue and parses them into inputs
 def update_input():
-    inputs["m pos"] = pygame.mouse.get_pos()
+    inputs["m pos"] = (round(pygame.mouse.get_pos()[0]/xpos_f), round(pygame.mouse.get_pos()[1]/ypos_f))
     inputs["m vel"] = pygame.mouse.get_rel()
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN:
@@ -104,7 +105,7 @@ def update_input():
                 inputs["m button"] = "u"                # Scroll up
             elif event.button == 5:
                 inputs["m button"] = "d"                # Scroll down
-            inputs["click pos"] = pygame.mouse.get_pos()
+            inputs["click pos"] = (round(pygame.mouse.get_pos()[0]/xpos_f), round(pygame.mouse.get_pos()[1]/ypos_f))
         if event.type == pygame.MOUSEBUTTONUP:
             inputs["m button"] = ""
             inputs["m hold tick"] = 0                     # Resets mouse hold tick
@@ -172,3 +173,10 @@ def reset_money_score():
     global score
     money = 0
     score = 0
+
+
+def set_scale(xf, yf):
+    global xpos_f
+    global ypos_f
+    xpos_f = xf
+    ypos_f = yf

@@ -1,7 +1,5 @@
 import pygame
 
-scale = 1
-
 # Loading the Arcade Classic font at font size 42
 subFont = pygame.font.Font("PressStart2P.ttf", 42)
 # Loads the same font, but large for headers

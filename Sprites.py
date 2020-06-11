@@ -83,8 +83,7 @@ class Entity(pygame.sprite.Sprite):
 
     # Draws the entity. Used by entities except for entities in groups
     def draw(self):
-        window = pygame.display.get_surface()
-        window.blit(self.image, self.rect)
+        Frame.blit(self.image, self.rect)
 
 
 
