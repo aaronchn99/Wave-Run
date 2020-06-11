@@ -1,3 +1,16 @@
+0.6.6.3
+- Dock life starts to count down once it appears on screen
+- Ship immediately leaves when Player leaves it
+- Fixed crash with invincibility bug
+- When Ship reaches end of level, player leaves ship and moves off screen
+- Timer bar drawn to dock that indicates time left before the ship leaves
+- Cannon added
+Known Bugs
+1. Occasionally shows desktop and taskbar
+2. Performance issues:
+	- Game capped to about 60fps under frame resize procedure
+	- Lag spikes (Possibly due to items)
+
 0.6.6.2
 - Changed combat system
 	- Enemy attacks at a constant rate

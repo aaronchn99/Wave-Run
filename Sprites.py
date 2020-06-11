@@ -177,16 +177,19 @@ class Item(Entity):
 
     # Method that applies all the item's effects onto the player sprite
     def apply_effect(self, playerSprite):
-        for effect in self._effect_list:
-            # Money effects add to the money variable
-            if effect[0] == "money":
-                add_money(effect[1])
-            # Health effects heal the player
-            elif effect[0] == "health":
-                playerSprite.heal(effect[1])
-            # Other effects use the Player's add_effect() method
-            else:
-                playerSprite.add_effect(effect[0], effect[1], effect[2])
+        if self._effect_list != ():
+            for effect in self._effect_list:
+                # Money effects add to the money variable
+                if effect[0] == "money":
+                    add_money(effect[1])
+                # Health effects heal the player
+                elif effect[0] == "health":
+                    playerSprite.heal(effect[1])
+                # Other effects use the Player's add_effect() method
+                else:
+                    playerSprite.add_effect(effect[0], effect[1], effect[2])
+        else:
+            print("Warning: No effects in " + self.get_name())
 
 
 
@@ -228,12 +231,22 @@ class SpecialItem(Item):
     def __init__(self, name, x, y, width, height, points, life_time, effects = (), color=None, image=None, frames=None, fps=1, current_frame=0):
         super().__init__(name, x, y, width, height, points, effects, color, image, frames, fps, current_frame)
         self._life_time = life_time
+        self._start_life_time = life_time
+        if self._render_mode != "animate":
+            self._base_image = self.image.copy()
 
 
 
     # Counts down the item's time until it is removed from the level
     def lifeCountdown(self):
         self._life_time -= Clock.get_time()
+
+
+
+    # Draws the life timer bar over the image/frame
+    def draw_timer(self):
+        length = (self._w)*(self._life_time/self._start_life_time)
+        pygame.draw.rect(self.image, RED, (0, (self._h/2)-5, length, 10))
 
 
 
@@ -318,11 +331,12 @@ class ShipDock(SpecialItem):
     def whenCollide(self, Player):
         self._sailing = True
         self.add_points()
-        Player.toggle_movement()
-        Player.toggle_noclip()
-        Player.toggle_transparency()
+        Player.disable_movement()
+        Player.enable_noclip()
+        Player.enable_transparency()
         pos = self._shipEntity.rect.center
         Player.set_pos(pos[0], pos[1])
+        Player.board_ship(self)
 
 
 
@@ -335,12 +349,19 @@ class ShipDock(SpecialItem):
 
     # Called when ship journey ends
     def when_sail_time_out(self, Player):
-        self._sailing = False
-        Player.toggle_movement()
-        Player.toggle_noclip()
-        Player.toggle_transparency()
+        self.jump_ship(Player)
         Player.trigger_invincibility(3000)
         return self.sail_away()
+
+
+
+    # Forces player off ship
+    def jump_ship(self, Player):
+        self._sailing = False
+        Player.enable_movement()
+        Player.disable_noclip()
+        Player.disable_transparency()
+        self._sail_time = 0
 
 
 
@@ -353,7 +374,9 @@ class ShipDock(SpecialItem):
                     # Player sails with ship if colliding with dock
                     self.whenCollide(player)
                     self._sailing = True
-                self.lifeCountdown()                    # Counts down dock's life time
+                # Counts down dock's life time if dock appears on screen
+                if self.rect.centerx <= native_res[0]:
+                    self.lifeCountdown()
             # If sailing
             else:
                 # Keep on sailing if sail time isn't expired
@@ -361,10 +384,10 @@ class ShipDock(SpecialItem):
                     self.move_ship()
                     self.while_sail(player)
                     self.sail_timer()
-                # Ship sails away and dock kills itself when sail time runs out
+                # Player leaves Ship and life time set to zero when sail time runs out
                 else:
-                    if self.when_sail_time_out(player):
-                        self.kill()
+                    self.when_sail_time_out(player)
+                    self._life_time = 0
         # Ship sails away and dock kills itself when life time runs out
         else:
             if self.when_life_time_out():
@@ -375,6 +398,84 @@ class ShipDock(SpecialItem):
         # Animates dock if it can
         if self.get_render_mode() == "animate":
             self.animate()
+        # Draws timer on current image/frame
+        self.image = self._base_image.copy()
+        self.draw_timer()
+
+
+
+
+# Special Item which can shoot the player across the level
+class Cannon(SpecialItem):
+
+
+
+    # Class constructor
+    def __init__(self, name, x, y, width, height, points, life_time, speed, angle, effects = (), color=None, image=None, frames=None,
+                 fps=1, current_frame=0):
+        super().__init__(name, x, y, width, height, points, life_time, effects, color, image, frames, fps, current_frame)
+        self._speed = speed
+        self._angle = (angle/360) * (2*math.pi)
+        self._player_flying = False
+
+
+
+    # Launches the player at a certain speed and angle
+    def launch(self, player):
+        vel_h = self._speed * math.cos(self._angle)
+        vel_v = -self._speed * math.sin(self._angle)
+        player.set_vel(vel_h, vel_v)
+        self._player_flying = True
+
+
+
+    # Called when player collides with cannon
+    def whenCollide(self, Player):
+        self.add_points()
+        Player.disable_movement()
+        Player.enable_noclip()
+        Player.high_speed_caps()
+        self.launch(Player)
+
+
+
+    # Called when player starts to fall (dy is positive)
+    def when_player_falling(self, player):
+        player.disable_noclip()
+        player.trigger_invincibility(100)
+
+
+
+    # Called when player lands on platform (dy = 0)
+    def when_player_land(self, player):
+        player.enable_movement()
+        player.normal_speed_caps()
+        player.trigger_invincibility(3000)
+        self.kill()
+
+
+
+    # Update method
+    def update(self, collide_list, player):
+        #
+        if self._life_time > 0:
+            if not self._player_flying:
+                if self.get_name() in collide_list:
+                    self.whenCollide(player)
+                self.lifeCountdown()
+            else:
+                player_dy = player.get_vel()[1]
+                if player_dy > 0:
+                    self.when_player_falling(player)
+                elif player_dy == 0:
+                    self.when_player_land(player)
+        #
+        else:
+            self.kill()
+        # Draws timer on current image/frame
+        self.image = self._base_image.copy()
+        self.draw_timer()
+
 
 
 
@@ -561,6 +662,7 @@ class playerClass(Character):
         self._min_dx = max_speeds[0][1]
         self._max_dy = max_speeds[1][0]
         self._min_dy = max_speeds[1][1]
+        self._max_speeds = max_speeds
         self._start_values = [self._accel, self._min_dy]
         self._trait_lvls = {"hp":0, "speed":0, "acc":0, "str":0, "def":0}
         self._dx = 0
@@ -569,6 +671,7 @@ class playerClass(Character):
         self._can_jump = False
         self._can_move = True
         self._opponent = None
+        self._ship = None
         self._noclip = False
         self._invincible = False
         self._invincible_time = 0
@@ -601,12 +704,13 @@ class playerClass(Character):
             elif self._dx >= self._max_dx:
                 self._dx = self._max_dx     # Sets player speed to the maximum speed if it exceeds it
 
-        # If neither left and right keys are pressed, the player stops moving horizontally
-        if left_key not in inputs["key"] and right_key not in inputs["key"]:
-            self._dx = 0
-        # Likewise, if left and right keys are pressed, the player stops moving horizontally
-        elif left_key in inputs["key"] and right_key in inputs["key"]:
-            self._dx = 0
+        if self._can_move:                  # Checks if player can move
+            # If neither left and right keys are pressed, the player stops moving horizontally
+            if left_key not in inputs["key"] and right_key not in inputs["key"]:
+                self._dx = 0
+            # Likewise, if left and right keys are pressed, the player stops moving horizontally
+            elif left_key in inputs["key"] and right_key in inputs["key"]:
+                self._dx = 0
         self.set_pos(self._x + self._dx * dt, self._y)       # The horizontal movement is applied
 
         # Platforms collidable if noclip turned off
@@ -673,38 +777,56 @@ class playerClass(Character):
 
 
 
-    # Toggles player's ability to move
-    def toggle_movement(self):
-        if self._can_move:
-            self._can_move = False
-        elif not self._can_move:
-            self._can_move = True
+    # Enables player's ability to move
+    def enable_movement(self):
+        self._can_move = True
 
 
 
-    # Toggles player's ability to move
-    def toggle_noclip(self):
-        if self._noclip:
-            self._noclip = False
-        elif not self._noclip:
-            self._noclip = True
+    # Disables player's ability to move
+    def disable_movement(self):
+        self._can_move = False
 
 
 
-    # Toggles player invisibility
-    def toggle_transparency(self):
-        if self._transparent:
-            self._transparent = False
-            self.image.set_alpha(255)
-        elif not self._transparent:
-            self._transparent = True
-            self.image.set_alpha(0)
+    # Enables player's ability to noclip
+    def enable_noclip(self):
+        self._noclip = True
+
+
+
+    # Disables player's ability to noclip
+    def disable_noclip(self):
+        self._noclip = False
+
+
+
+    # Enables player invisibility
+    def enable_transparency(self):
+        self._transparent = True
+        self.image.set_alpha(0)
+
+
+
+    # Disables player invisibility
+    def disable_transparency(self):
+        self._transparent = False
+        self.image.set_alpha(255)
 
 
 
     # Allows the player to move at high velocities (When the player is launched)
     def high_speed_caps(self):
         self._max_dx, self._min_dx, self._max_dy, self._min_dy = 99999, 99999, 99999, 99999
+
+
+
+    # Resets the speed caps to normal
+    def normal_speed_caps(self):
+        self._max_dx = self._max_speeds[0][0]
+        self._min_dx = self._max_speeds[0][1]
+        self._max_dy = self._max_speeds[1][0]
+        self._min_dy = self._max_speeds[1][1]
 
 
 
@@ -772,6 +894,27 @@ class playerClass(Character):
     # Returns the current opponent
     def get_opponent(self):
         return self._opponent
+
+
+
+    # Adds the boarding ship to the ship attribute
+    def board_ship(self, ship_dock):
+        self._ship = ship_dock
+
+
+
+    # Removes the ship from the ship attribute
+    def jump_ship(self):
+        self._ship.jump_ship(self)
+
+
+
+    # Checks if the player is sailing on a ship
+    def is_sailing(self):
+        if self._ship != None:
+            return True
+        else:
+            return False
 
 
 
@@ -888,6 +1031,13 @@ class playerClass(Character):
     def trigger_invincibility(self, time):
         self._invincible = True             # Sets the invincible flag to true
         self._invincible_time = time        # Sets the duration of invincibility
+
+
+
+    # Disables invincibility
+    def disable_invincibility(self):
+        self._invincible = False
+        self._invincible_time = 0
 
 
 

@@ -367,19 +367,23 @@ def buildLevel(map, metadata, tile_dim, Groups):
                 Collidables.add(crate)
                 Drawables.add(crate, layer=3)
             elif tile == "S":
-                dock = ShipDock(name, pos[0], pos[1], 40, 40, 1000, 10000, 100000, 1000, dock_color=GREEN,
+                dock = ShipDock(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 1000, 10000, 3000, 1000, dock_color=GREEN,
                                  ship_w=400, ship_h=200, ship_color=BLUE)
                 dock.ship_on_water(int(metadata["height"])*tile_dim[1])
                 Drawables.add(dock, layer=3)
                 Collidables.add(dock)
                 dock.ship_drawable(Drawables)
+            elif tile == "F":
+                cannon = Cannon(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 100, 10000, 2000, 30, color=YELLOW)
+                Drawables.add(cannon, layer=3)
+                Collidables.add(cannon)
             elif tile == "P":
                 global playerSprite
                 playerSprite.set_pos(pos[0], pos[1])
                 playerSprite.clear_effects()
                 playerSprite.set_vel(0, 0)
                 playerGroup.add(playerSprite)
-                Drawables.add(playerSprite, layer=1)
+                Drawables.add(playerSprite, layer=4)
             elif tile == "E":
                 enemy = Enemy(name, pos[0], pos[1], tile_dim[0], tile_dim[1], (255, 0, 255), 3, 2, 0.4, 2, 100, 300)
                 Collidables.add(enemy)
@@ -759,7 +763,7 @@ if __name__ == "__main__":
                 EndArea = pygame.Rect(end_pos, end_area)
                 buildLevel(Map, Metadata, tile_dim, (Drawables, playerGroup, Collidables, Platforms))
                 Wave = Tsunami("wave", -length*tile_dim[0], 0, length*tile_dim[0], height*tile_dim[0], BLUE, 5, 5000)
-                Drawables.add(Wave, layer=4)
+                Drawables.add(Wave, layer=5)
                 Collidables.add(Wave)
                 GameCam = Camera(native_res, (length*tile_dim[0], height*tile_dim[1]))
                 tile_progress = 0
@@ -796,6 +800,7 @@ if __name__ == "__main__":
                         player_ap = playerSprite.get_ap()
                         enemy_ap = enemy.get_ap()
                         attack_key = rand.randint(97, 122)
+                        attack_times = rand.randrange(5, 10)
                         progress = 0
                         combat_init = True
                         playerSprite.user_move(inputs, [enemy])
@@ -803,8 +808,12 @@ if __name__ == "__main__":
                         attack = player_sp * (1 - enemy_ap)
                         progress += attack
                         inputs["key"].remove(attack_key)
-                        if rand.random() <= 1/5:
-                            attack_key = rand.randint(97, 122)
+                        attack_times -= 1
+                        if attack_times == 0:
+                            old_key = attack_key
+                            while attack_key == old_key:
+                                attack_key = rand.randint(97, 122)
+                            attack_times = rand.randrange(5, 10)
                     attack = (enemy_sp * (1 - player_ap))*(Clock.get_time()/1000)
                     progress -= attack
                     if progress <= -player_hp:
@@ -838,6 +847,9 @@ if __name__ == "__main__":
             if playerSprite.get_hp() <= 0:
                 mode = "lose"
             elif playerSprite.rect.colliderect(EndArea):
+                playerSprite.disable_invincibility()
+                if playerSprite.is_sailing():
+                    playerSprite.jump_ship()
                 inputs["key"] = []
                 mode = "pass"
 
@@ -976,6 +988,6 @@ if __name__ == "__main__":
         # The window is updated
         pygame.display.flip()
         # Clock object restricts the game to the set ticks per second
-        Clock.tick_busy_loop(ticks)
+        Clock.tick(ticks)
     # Quits and de-initialises Pygame
     pygame.quit()
