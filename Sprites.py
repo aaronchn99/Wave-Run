@@ -636,17 +636,17 @@ class playerClass(Character):
     def upgrade_trait(self, trait, amount):
         for i in range(amount):
             if trait == "hp":
-                self._max_hp += 1
+                self._max_hp += upgrades["hp"]
             elif trait == "speed":
-                self._max_dx = self._max_dx * 1.09
-                self._min_dx = self._min_dx * 1.09
+                self._max_dx = self._max_dx * upgrades["speed"]
+                self._min_dx = self._min_dx * upgrades["speed"]
             elif trait == "acc":
-                self._accel = self._accel * 1.1
+                self._accel = self._accel * upgrades["acc"]
                 self._start_values[0] = self._accel
             elif trait == "str":
-                self._sp = self._sp * 1.2
+                self._sp = self._sp * upgrades["str"]
             elif trait == "def":
-                self._ap += 0.05
+                self._ap += upgrades["def"]
             else:
                 print("Error: Trait" + trait + " not a valid trait")
             self._trait_lvls[trait] += 1

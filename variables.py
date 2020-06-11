@@ -1,4 +1,5 @@
 import pygame
+import json
 pygame.init()
 # Pygame environment variables
 window_name = "Game"
@@ -28,15 +29,18 @@ ypos_f = 1.0
 money = 0
 score = 0
 health = 2
+# Configs
+with open("configs\\upgrades.cfg", "r") as config:
+    upgrades = json.load(config)
 # Physics constants and variables
-player_accel = 720
-max_dy = 360
-min_dy = -360
-max_dx = 420
-min_dx = -420
-player_x = 960
-player_y = 354
-g = 1440
+with open("configs\\playerphysics.cfg", "r") as config:
+    physics = json.load(config)
+player_accel = physics["acc"]
+max_dy = physics["dy"]
+min_dy = -physics["dy"]
+max_dx = physics["dx"]
+min_dx = -physics["dx"]
+g = physics["g"]
 # Declaring colour constants
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
@@ -79,7 +83,9 @@ settings_dict = default_settings.copy()
 # List storing all object names
 obj_names = []
 
-'''Functions'''
+''''Functions'''
+
+
 # Procedure that gets inputs from queue and parses them into inputs
 def update_input():
     inputs["m pos"] = (round(pygame.mouse.get_pos()[0]/xpos_f), round(pygame.mouse.get_pos()[1]/ypos_f))
@@ -132,10 +138,12 @@ def check_name(name):
             print("Warning: Obj name " + name + " changed to " + new_name)
     return new_name                     # Returns the name found
 
+
 # Removes passed name from obj_names
 def remove_name(name):
     if name in obj_names:
         obj_names.remove(name)
+
 
 # Function that adds points based on distance covered
 def score_distance(player_pos, progress):
@@ -170,6 +178,7 @@ def get_points():
 def get_money():
     global money
     return money
+
 
 # Reset money and score
 def reset_money_score():

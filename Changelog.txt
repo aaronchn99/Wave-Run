@@ -1,3 +1,11 @@
+0.6.5.5
+- Set up json config files for upgrade and physics values
+- Balanced item and obstacle attributes (Temporary fix)
+- Fixed bug that allowed one key to be bound to multiple actions
+Known Bugs
+~ Significant lag spike at 1600x900 and larger
+~ Image artefacts still truncated when set to resolution smaller than 1920x1080
+
 0.6.5.4
 - Fixed issue with warning messages in console after new level load
 Known Bugs

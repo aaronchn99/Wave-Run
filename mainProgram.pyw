@@ -5,6 +5,7 @@ from Sprites import *
 from MenuObjs import *
 import os
 import ctypes
+import pygame.freetype
 pygame.init()
 from Images import *
 import platform
@@ -314,12 +315,12 @@ def buildLevel(map, metadata, tile_dim, Groups):
                 for Group in (Drawables, Collidables, Platforms):
                     Group.add(platform)
             elif tile == "C":
-                coin = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], rand.randint(10, 40), ["money", 1, 0],
+                coin = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], rand.randint(5, 20), ["money", 1, 0],
                             image=crop(EntitySheet, (0, 0), (40, 40)))
                 for Group in (Drawables, Collidables):
                     Group.add(coin)
             elif tile == "T":
-                chest = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], rand.randint(50, 100),
+                chest = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], rand.randint(25, 50),
                              ["money", 20, 0], image=crop(EntitySheet, (40, 0), (40, 40)))
                 for Group in (Drawables, Collidables):
                     Group.add(chest)
@@ -334,17 +335,17 @@ def buildLevel(map, metadata, tile_dim, Groups):
                 for Group in (Drawables, Collidables):
                     Group.add(medkit)
             elif tile == "R":
-                rum = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], rand.randint(100, 200),
-                           [["health", 3, 0], ["slow", 3, 10000]], image=crop(EntitySheet, (40, 40), (40, 40)))
+                rum = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], rand.randint(50, 100),
+                           [["health", 2, 0], ["slow", 150, 10000]], image=crop(EntitySheet, (40, 40), (40, 40)))
                 for Group in (Drawables, Collidables):
                     Group.add(rum)
             elif tile == "H":
                 horse = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], rand.randint(100, 200),
-                             ["fast", 5, 20000], image=crop(EntitySheet, (80, 40), (40, 40)))
+                             ["fast", 240, 15000], image=crop(EntitySheet, (80, 40), (40, 40)))
                 for Group in (Drawables, Collidables):
                     Group.add(horse)
             elif tile == "A":
-                anchor = Obstacle(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 1, 200, 6000,
+                anchor = Obstacle(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 1, 200, 4000,
                                   image=crop(EntitySheet, (0, 80), (40, 40)))
                 for Group in (Drawables, Collidables):
                     Group.add(anchor)
@@ -366,7 +367,7 @@ def buildLevel(map, metadata, tile_dim, Groups):
                 for Group in (Drawables, playerGroup):
                     Group.add(playerSprite)
             elif tile == "E":
-                enemy = Enemy(name, pos[0], pos[1], tile_dim[0], tile_dim[1], (255, 0, 255), 3, 2, 0.4, 2, 500, 400)
+                enemy = Enemy(name, pos[0], pos[1], tile_dim[0], tile_dim[1], (255, 0, 255), 3, 2, 0.4, 2, 100, 300)
                 for Group in (Drawables, Collidables):
                     Group.add(enemy)
 
@@ -575,10 +576,15 @@ if __name__ == "__main__":
             # Handles set left button
             if Settings.find_obj("set left button").get_trigger() or action_bind == "left":
                 action_bind = "left"
-                if inputs["key"] != []:
+                if inputs["key"] != [] and bind_time <= 5000:
+                    if inputs["key"][0] not in (settings_dict["right key"], settings_dict["jump key"]):
+                        action_bind = ""
+                        settings_dict["left key"] = inputs["key"][0]
+                        bind_time = 5000
+                    else:
+                        bind_time = 8000
+                elif bind_time > 5000 and bind_time <= 6000:
                     action_bind = ""
-                    settings_dict["left key"] = inputs["key"][0]
-                    apply_settings(settings_dict)
                     bind_time = 5000
                 else:
                     bind_time -= Clock.get_time()
@@ -588,10 +594,15 @@ if __name__ == "__main__":
             # Handles set right button
             if Settings.find_obj("set right button").get_trigger() or action_bind == "right":
                 action_bind = "right"
-                if inputs["key"] != []:
+                if inputs["key"] != [] and bind_time <= 5000:
+                    if inputs["key"][0] not in (settings_dict["left key"], settings_dict["jump key"]):
+                        action_bind = ""
+                        settings_dict["right key"] = inputs["key"][0]
+                        bind_time = 5000
+                    else:
+                        bind_time = 8000
+                elif bind_time > 5000 and bind_time <= 6000:
                     action_bind = ""
-                    settings_dict["right key"] = inputs["key"][0]
-                    apply_settings(settings_dict)
                     bind_time = 5000
                 else:
                     bind_time -= Clock.get_time()
@@ -601,10 +612,15 @@ if __name__ == "__main__":
             # Handles set jump button
             if Settings.find_obj("set jump button").get_trigger() or action_bind == "jump":
                 action_bind = "jump"
-                if inputs["key"] != []:
+                if inputs["key"] != [] and bind_time <= 5000:
+                    if inputs["key"][0] not in (settings_dict["right key"], settings_dict["left key"]):
+                        action_bind = ""
+                        settings_dict["jump key"] = inputs["key"][0]
+                        bind_time = 5000
+                    else:
+                        bind_time = 8000
+                elif bind_time > 5000 and bind_time <= 6000:
                     action_bind = ""
-                    settings_dict["jump key"] = inputs["key"][0]
-                    apply_settings(settings_dict)
                     bind_time = 5000
                 else:
                     bind_time -= Clock.get_time()
@@ -644,21 +660,30 @@ if __name__ == "__main__":
             # Drawing code
             Settings.draw()
             if action_bind == "left":
-                label = subFont.render(str(int(bind_time/1000)+1)+"...", False, BLACK)
+                if bind_time <= 5000:
+                    label = subFont.render(str(int(bind_time/1000)+1)+"...", False, BLACK)
+                else:
+                    label = subFont.render("Key Used", False, BLACK)
             else:
                 label = subFont.render(pygame.key.name(settings_dict["left key"]), False, BLACK)
             pos = list(label.get_rect(midleft=Settings.find_obj("set left button").rect.midleft).topleft)
             pos[0] += 10
             Frame.blit(label, pos)
             if action_bind == "right":
-                label = subFont.render(str(int(bind_time/1000)+1)+"...", False, BLACK)
+                if bind_time <= 5000:
+                    label = subFont.render(str(int(bind_time/1000)+1)+"...", False, BLACK)
+                else:
+                    label = subFont.render("Key Used", False, BLACK)
             else:
                 label = subFont.render(pygame.key.name(settings_dict["right key"]), False, BLACK)
             pos = list(label.get_rect(midleft=Settings.find_obj("set right button").rect.midleft).topleft)
             pos[0] += 10
             Frame.blit(label, pos)
             if action_bind == "jump":
-                label = subFont.render(str(int(bind_time / 1000) + 1)+"...", False, BLACK)
+                if bind_time <= 5000:
+                    label = subFont.render(str(int(bind_time / 1000) + 1)+"...", False, BLACK)
+                else:
+                    label = subFont.render("Key Used", False, BLACK)
             else:
                 label = subFont.render(pygame.key.name(settings_dict["jump key"]), False, BLACK)
             pos = list(label.get_rect(midleft=Settings.find_obj("set jump button").rect.midleft).topleft)
@@ -671,7 +696,7 @@ if __name__ == "__main__":
         elif mode == "play":
             # Initialises game
             if not game_init:
-                playerSprite = playerClass("player", player_x, player_y, 32, 48, RED, health, player_accel,
+                playerSprite = playerClass("player", 0, 0, 32, 48, RED, health, player_accel,
                                            ((max_dx, min_dx), (max_dy, min_dy)), 1, 0.4)
                 # Represents the area of the course
                 CourseArea = pygame.Rect(0, 0, 1.5 * native_res[0], native_res[1])
