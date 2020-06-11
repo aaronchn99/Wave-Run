@@ -1,11 +1,20 @@
+0.6.6.1
+- Added back colour behind effect sprites
+- Added Wave pointer on progress bar
+- Resized Combat system
+- Added plank images to platforms
+- Added animation to coins
+Known Bugs
+~ Occasionally shows desktop and taskbar
+
 0.6.6.0
 - Resized game based on 1024x768 resolution
 - Fixed issue with window positioning outside the screen
 - Lag spike reduced due to resolution change
 - Image artefacts no longer truncated
 Known Bugs
-- Combat system not yet resized
-- Occasionally shows desktop and taskbar
+~ Combat system not yet resized
+~ Occasionally shows desktop and taskbar
 
 0.6.5.5
 - Set up json config files for upgrade and physics values

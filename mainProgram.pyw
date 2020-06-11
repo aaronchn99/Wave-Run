@@ -99,12 +99,12 @@ class HUD(object):
         self.progressLabel = subFont.render("Course", False, WHITE)
         # The update function is called to render Text objects to show initial score and money
         # values and a list of Rects to represent the initial health
-        self.hud_update(health, max_hp, money, score, [], 0)
+        self.hud_update(health, max_hp, money, score, [], 0, 0)
 
 
 
     # Update the values shown by the HUD
-    def hud_update(self, hp, max_hp, money, score, effects, progress):
+    def hud_update(self, hp, max_hp, money, score, effects, player_progress, wave_progress):
         # Sets up the list of hearts
         # It is only set up if the health is larger than 0
         hearts = []
@@ -138,7 +138,10 @@ class HUD(object):
         self.progressBar.fill(WHITE, pygame.Rect((0, 0, 14, 42)))
         self.progressBar.fill(WHITE, pygame.Rect((726, 0, 14, 42)))
         self.progressBar.fill(WHITE, pygame.Rect((0, 18, 740, 6)))
-        self.progressBar.fill(RED, pygame.Rect((round(712 * progress, 0), 0, 28, 42)))
+        self.progressBar.fill(RED, pygame.Rect((round(740 * player_progress - 14), 0, 28, 42)))
+        wavePointer = pygame.Surface((42, 42))
+        wavePointer.fill(BLUE)
+        self.progressBar.blit(wavePointer, (round((740 * wave_progress) - 42), 0))
         # The Text object showing the current money and score values are rendered, taking the
         # money and score arguments in string data type
         self.moneyValue = subFont.render(str(money), False, YELLOW)
@@ -181,15 +184,15 @@ class HUD(object):
                     Hearts.blit(Heart5, (73 * i, 0))
             screen.blit(Hearts, heartRect.topleft)
         # The "Gold" label is drawn
-        screen.blit(self.moneyLabel, (630, 16))
+        screen.blit(self.moneyLabel, (660, 16))
         # The Text that shows the money amount is drawn next to the Gold label
-        pos = list(self.moneyLabel.get_rect(topleft=(630, 16)).topright)
+        pos = list(self.moneyLabel.get_rect(topleft=(660, 16)).topright)
         pos[0] = pos[0] + 20
         screen.blit(self.moneyValue, pos)
         # The "Score" label is drawn
-        screen.blit(self.scoreLabel, (630, 60))
+        screen.blit(self.scoreLabel, (660, 60))
         # Similar to the money amount text, the score value text is drawn next to the Score label
-        pos = list(self.scoreLabel.get_rect(topleft=(630, 60)).topright)
+        pos = list(self.scoreLabel.get_rect(topleft=(660, 60)).topright)
         pos[0] = pos[0] + 20
         screen.blit(self.scoreValue, pos)
         # Draws the Effects label
@@ -213,10 +216,13 @@ class HUD(object):
             effectSurf = pygame.Surface(spriteRect.size)
             for i in range(len(effect_list)):
                 if effect_list[i] == "fast":
+                    pygame.draw.rect(effectSurf, WHITE, fastSprite.get_rect(topleft=(70 * i, 0)))
                     effectSurf.blit(fastSprite, (70 * i, 0))
                 elif effect_list[i] == "slow":
+                    pygame.draw.rect(effectSurf, WHITE, slowSprite.get_rect(topleft=(70 * i, 0)))
                     effectSurf.blit(slowSprite, (70 * i, 0))
                 elif effect_list[i] == "knockout":
+                    pygame.draw.rect(effectSurf, WHITE, koSprite.get_rect(topleft=(70 * i, 0)))
                     effectSurf.blit(koSprite, (70 * i, 0))
             screen.blit(effectSurf, spriteRect.topleft)
         # Draws the progress label
@@ -312,12 +318,13 @@ def buildLevel(map, metadata, tile_dim, Groups):
             if tile == " ":
                 pass
             elif tile == "#":
-                platform = Platform(name, pos[0], pos[1], tile_dim[0], tile_dim[1], BLACK)
+                platform = Platform(name, pos[0], pos[1], tile_dim[0], tile_dim[1],
+                                    image=crop(PlatformSheet, (0, 0), (40, 40)))
                 for Group in (Drawables, Collidables, Platforms):
                     Group.add(platform)
             elif tile == "C":
                 coin = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], rand.randint(5, 20), ["money", 1, 0],
-                            image=crop(EntitySheet, (0, 0), (40, 40)))
+                            frames=coin_frames, fps=8)
                 for Group in (Drawables, Collidables):
                     Group.add(coin)
             elif tile == "T":
@@ -414,6 +421,14 @@ if __name__ == "__main__":
     EffectSheet = pygame.image.load("images\Effects.png")
     # Loads and crops sprite images for items and obstacles
     EntitySheet = pygame.image.load("images\ItemObstacles.png")
+    #
+    PlatformSheet = pygame.image.load("images\Platforms.png")
+    #
+    CoinSheet = pygame.image.load("images\Coin.png")
+
+    coin_frames = []
+    for i in range(8):
+        coin_frames.append(crop(CoinSheet, (40*i, 0), (40, 40)))
 
     ''' Class instances '''
     # Menus
@@ -755,12 +770,14 @@ if __name__ == "__main__":
 
                     # The player's progress in the course is calculated
                     progress = (playerSprite.get_pos()[0] - GameCam.get_rect().left)/(EndArea.left - GameCam.get_rect().left)
+                    # The wave's progress in the course is calculated
+                    wave_progress = (Wave.rect.right - GameCam.get_rect().left)/(EndArea.left - GameCam.get_rect().left)
                     # The player's tile position is calculated for the score_distance function
                     player_pos = playerSprite.get_pos()[0] - GameCam.get_rect().left
                     tile_progress = score_distance(player_pos, tile_progress)
                     # New updated HUD elements are returned to new_values
                     Hud.hud_update(playerSprite.get_hp(), playerSprite.get_max_hp(), get_money(), get_points(),
-                                   playerSprite.get_effects(), progress)
+                                   playerSprite.get_effects(), progress, wave_progress)
                     # Handles pause button
                     pause = pauseButton.get_trigger()
                 else:
@@ -795,14 +812,14 @@ if __name__ == "__main__":
                         combat_init = False
                     # Drawing code
                     KeySignal = headerFont.render(chr(attack_key).upper(), False, YELLOW)
-                    Back = pygame.Rect((0, 0), (200, 150))
-                    Back.center = KeySignal.get_rect(topleft=(960-int(KeySignal.get_width()/2), 400)).center
+                    Back = pygame.Rect((0, 0), (100, 100))
+                    Back.center = KeySignal.get_rect(topleft=(512-int(KeySignal.get_width()/2), 250)).center
                     CombatBar = pygame.Surface((800, 50))
                     progress_pos = int(800*((player_hp+progress)/(player_hp+enemy_hp)))
                     neutral_pos = int(800*(player_hp/(player_hp+enemy_hp)))
                     CombatBar.fill(RED)
                     CombatBar.fill(WHITE, pygame.Rect(neutral_pos-1, 0, 2, 50))
-                    Pointer = pygame.Rect(560+progress_pos-1, 580, 2, 70)
+                    Pointer = pygame.Rect(112+progress_pos-1, 380, 2, 70)
                 if pygame.K_ESCAPE in inputs["key"]:
                     pause = True
                     inputs["key"].remove(pygame.K_ESCAPE)
@@ -828,8 +845,8 @@ if __name__ == "__main__":
             pauseButton.draw()
             if combat_init == True:
                 pygame.draw.rect(Frame, BLUE, Back)
-                Frame.blit(KeySignal, (960-int(KeySignal.get_width()/2), 400))
-                Frame.blit(CombatBar, (560, 600))
+                Frame.blit(KeySignal, (512-int(KeySignal.get_width()/2), 250))
+                Frame.blit(CombatBar, (112, 400))
                 pygame.draw.rect(Frame, BLACK, Pointer)
             if pause:
                 Frame.blit(Overlay, (0,0))

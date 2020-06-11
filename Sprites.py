@@ -1,5 +1,5 @@
 from variables import *
-hitbox_mode = False
+hitbox_mode = 0
 
 
 def update_controls(left, right, jump):
@@ -18,7 +18,7 @@ class Entity(pygame.sprite.Sprite):
 
 
     # The class constructor. Takes the sprite name, position, dimensions and fill colour
-    def __init__(self, name, x, y, width, height, color=None, image=None):
+    def __init__(self, name, x, y, width, height, color=None, image=None, frames=None, fps=1, current_frame=0):
         # Calls the superclass' constructor (i.e. Sprite class)
         super().__init__()
         # Positional and dimensional attributes
@@ -31,11 +31,20 @@ class Entity(pygame.sprite.Sprite):
         if image != None:
             self.image = image
             self.image = pygame.transform.scale(self.image, (self._w, self._h))
+            self._render_mode = "image"
         elif color != None:
             self.image = pygame.Surface((self._w, self._h))
             self.image.fill(color)
+            self._render_mode = "color"
+        elif frames != None:
+            self._frames = frames
+            self._animate_fps = fps
+            self._current_frame = current_frame
+            self.image = frames[current_frame]
+            self._render_mode = "animate"
         else:
             self.image = pygame.Surface((self._w, self._h))
+            self._render_mode = "black"
         if hitbox_mode:
             pygame.draw.rect(self.image, GREEN, (0,0,self._w,self._h), 1)
         # The Entity object's rect attribute is a Rect object with the dimensions of the
@@ -55,6 +64,7 @@ class Entity(pygame.sprite.Sprite):
     # Sets the Entity's position
     def set_pos(self, x, y):
         self._x, self._y = x, y
+        self.update_pos()
 
 
 
@@ -87,6 +97,15 @@ class Entity(pygame.sprite.Sprite):
 
 
 
+    # Animates the entity by changing the current frame
+    def animate(self):
+        self._current_frame += self._animate_fps * Clock.get_time()/1000
+        if self._current_frame >= len(self._frames):
+            self._current_frame = 0
+        self.image = self._frames[int(self._current_frame)]
+
+
+
     def kill(self):
         remove_name(self._name)
         super().kill()
@@ -100,9 +119,9 @@ class Platform(Entity):
 
 
     # Class constructor required name, position, dimensions and colour
-    def __init__(self, name, x, y, width, height, color):
+    def __init__(self, name, x, y, width, height, color=None, image=None):
         # Calls the superclass' constructor (i.e. Entity)
-        super().__init__(name, x, y, width, height, color)
+        super().__init__(name, x, y, width, height, color=color, image=image)
 
 
 
@@ -129,9 +148,9 @@ class Item(Entity):
 
 
     # Class constructor
-    def __init__(self, name, x, y, width, height, points, effects = (), color=None, image=None):
+    def __init__(self, name, x, y, width, height, points, effects = (), color=None, image=None, frames=None, fps=1, current_frame=0):
         # Calls superclass' constructor
-        super().__init__(name, x, y, width, height, color, image)
+        super().__init__(name, x, y, width, height, color, image, frames, fps, current_frame)
         # Private attribute for points that the player collects upon picking this item up
         self._points = points
         # Effect list is a list of 3 element arrays in this form: [type, amount, duration]
@@ -181,6 +200,8 @@ class Item(Entity):
 
     # Updates sprite, which is called by the Collidables group
     def update(self, collide_list, player):
+        if self._render_mode == "animate":
+            self.animate()
         # If this sprite is colliding with the player, it calls the whenCollide() method and then
         # kills itself, which removes itself from all groups
         if self.get_name() in collide_list:
@@ -198,8 +219,8 @@ class Obstacle(Entity):
 
 
     # Class constructor
-    def __init__(self, name, x, y, width, height, damage, lost_points, knockout_time, color=None, image=None):
-        super().__init__(name, x, y, width, height, color, image)
+    def __init__(self, name, x, y, width, height, damage, lost_points, knockout_time, color=None, image=None, frames=None, fps=1, current_frame=0):
+        super().__init__(name, x, y, width, height, color, image, frames, fps, current_frame)
         # The damage inflicted on the player upon collision.
         self._damage = damage
         # Points the player loses upon collision.
@@ -253,8 +274,8 @@ class Tsunami(Obstacle):
 
 
     # Class constructor
-    def __init__(self, name, x, y, width, height, color, speed, delay):
-        super().__init__(name, x, y, width, height, 9999, 0, 0, color)
+    def __init__(self, name, x, y, width, height, color, speed, delay, image=None, frames=None, fps=1, current_frame=0):
+        super().__init__(name, x, y, width, height, 9999, 0, 0, color, image, frames, fps, current_frame)
         self._speed = speed     # How far the wave moves per tick
         self._delay = delay     # The delay before the wave starts moving
         self._start_pos = (x, y)

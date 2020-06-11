@@ -47,6 +47,12 @@ class guiObj(Entity):
 
 
 
+    # Removes Entity scroll method by overriding
+    def scroll(self, vel):
+        pass
+
+
+
 
 # Class for images in Menus
 class Image(guiObj):
