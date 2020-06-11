@@ -6,6 +6,7 @@ from MenuObjs import *
 import os
 import ctypes
 import pygame.freetype
+os.environ['SDL_VIDEO_WINDOW_POS'] = "100, 100"
 pygame.init()
 from Images import *
 import platform
@@ -13,7 +14,7 @@ if platform.release() in ("Vista", "7", "8", "9", "10"):
     # Set the program to be DPI aware to avoid window stretching (Only for Vista or later)
     user32 = ctypes.windll.user32
     user32.SetProcessDPIAware()
-# Turns of and on fullscreen to fix dodgy fullscreen
+# Turns off and on fullscreen to fix dodgy fullscreen
 pygame.display.set_mode(resolution)
 pygame.display.set_mode(resolution, pygame.FULLSCREEN)
 # Game program variables
@@ -87,7 +88,7 @@ class HUD(object):
     # Constructs the HUD for the first time
     def __init__(self, health, max_hp, money, score):
         # HUD background is rendered
-        self.background = pygame.Surface((1920, 200))
+        self.background = pygame.Surface((native_res[0], 208))
         self.background.fill(BLACK)
         # Using the font loaded in the loading procedure, Text objects are set up and rendered
         # first for the variable labels
@@ -133,11 +134,11 @@ class HUD(object):
             effectList.append(effect[0])
         self.effect_list = effectList
         # Creates progress bar as one Surface
-        self.progressBar = pygame.Surface((1528, 42))
-        self.progressBar.fill(WHITE, pygame.Rect(0, 0, 14, 42))
-        self.progressBar.fill(WHITE, pygame.Rect(1514, 0, 14, 42))
-        self.progressBar.fill(WHITE, pygame.Rect(14, 15, 1500, 6))
-        self.progressBar.fill(RED, pygame.Rect(round(1514 * progress, 0), 0, 28, 42))
+        self.progressBar = pygame.Surface((740, 42))
+        self.progressBar.fill(WHITE, pygame.Rect((0, 0, 14, 42)))
+        self.progressBar.fill(WHITE, pygame.Rect((726, 0, 14, 42)))
+        self.progressBar.fill(WHITE, pygame.Rect((0, 18, 740, 6)))
+        self.progressBar.fill(RED, pygame.Rect((round(712 * progress, 0), 0, 28, 42)))
         # The Text object showing the current money and score values are rendered, taking the
         # money and score arguments in string data type
         self.moneyValue = subFont.render(str(money), False, YELLOW)
@@ -150,7 +151,7 @@ class HUD(object):
         # The image of the HUD background is drawn on the window
         screen.blit(self.background, (0, 0))
         # The Hearts label is drawn
-        screen.blit(self.hpLabel, (177, 10))
+        screen.blit(self.hpLabel, (78, 16))
         # The list of hearts to be drawn is put together as one Surface object and centre-aligned
         # with the "Hearts" label.
         if self.Hearts != []:
@@ -163,8 +164,8 @@ class HUD(object):
             heartRect = pygame.Rect((0, 0), (70, 65))
             for i in range(1, len(arrange)):
                 heartRect = heartRect.union(pygame.Rect((73 * i, 0), (70, 65)))
-            heart_x = self.hpLabel.get_rect(topleft=(177, 10)).midbottom[0]
-            heart_y = self.hpLabel.get_rect(topleft=(177, 10)).midbottom[1] + 8
+            heart_x = self.hpLabel.get_rect(topleft=(78, 16)).midbottom[0]
+            heart_y = self.hpLabel.get_rect(topleft=(78, 16)).midbottom[1] + 8
             heartRect.midtop = (heart_x, heart_y)
             Hearts = pygame.Surface((heartRect.width, heartRect.height))
             for i in range(len(arrange)):
@@ -180,19 +181,19 @@ class HUD(object):
                     Hearts.blit(Heart5, (73 * i, 0))
             screen.blit(Hearts, heartRect.topleft)
         # The "Gold" label is drawn
-        screen.blit(self.moneyLabel, (1210, 10))
+        screen.blit(self.moneyLabel, (630, 16))
         # The Text that shows the money amount is drawn next to the Gold label
-        pos = list(self.moneyLabel.get_rect(topleft=(1210, 10)).topright)
-        pos[0] = pos[0] + 40
+        pos = list(self.moneyLabel.get_rect(topleft=(630, 16)).topright)
+        pos[0] = pos[0] + 20
         screen.blit(self.moneyValue, pos)
         # The "Score" label is drawn
-        screen.blit(self.scoreLabel, (1210, 60))
+        screen.blit(self.scoreLabel, (630, 60))
         # Similar to the money amount text, the score value text is drawn next to the Score label
-        pos = list(self.scoreLabel.get_rect(topleft=(1210, 60)).topright)
-        pos[0] = pos[0] + 40
+        pos = list(self.scoreLabel.get_rect(topleft=(630, 60)).topright)
+        pos[0] = pos[0] + 20
         screen.blit(self.scoreValue, pos)
         # Draws the Effects label
-        screen.blit(self.effectLabel, (720, 10))
+        screen.blit(self.effectLabel, (360, 16))
         # The list of effect sprites to be drawn is put together as one Surface object and centre-aligned
         # with the Effects label.
         effect_list = self.effect_list
@@ -206,8 +207,8 @@ class HUD(object):
             spriteRect = fastSprite.get_rect()
             for i in range(1, len(effect_list)):
                 spriteRect = spriteRect.union(fastSprite.get_rect(topleft=(70 * i, 0)))
-            x = self.effectLabel.get_rect(topleft=(720, 10)).midbottom[0]
-            y = self.effectLabel.get_rect(topleft=(720, 10)).midbottom[1] + 8
+            x = self.effectLabel.get_rect(topleft=(360, 16)).midbottom[0]
+            y = self.effectLabel.get_rect(topleft=(360, 16)).midbottom[1] + 8
             spriteRect.midtop = (x, y)
             effectSurf = pygame.Surface(spriteRect.size)
             for i in range(len(effect_list)):
@@ -219,9 +220,9 @@ class HUD(object):
                     effectSurf.blit(koSprite, (70 * i, 0))
             screen.blit(effectSurf, spriteRect.topleft)
         # Draws the progress label
-        screen.blit(self.progressLabel, (55, 140))
+        screen.blit(self.progressLabel, (16, 150))
         # Draws the progress bar next to the label
-        screen.blit(self.progressBar, (337, 140))
+        screen.blit(self.progressBar, (260, 150))
 
 
 
@@ -266,7 +267,7 @@ def lvl_clear(inputs):
 def game_win():
     Frame.fill(WHITE)
     winText = headerFont.render("You win", False, GREEN)
-    continueText = subFont.render("Press enter to go back to main menu", False, GREEN)
+    continueText = labelFont.render("Press enter to go back to menu", False, GREEN)
     pos = winText.get_rect(center=(int(native_res[0] / 2), int(native_res[1] / 2))).topleft
     Frame.blit(winText, pos)
     pos = continueText.get_rect(center=(int(native_res[0] / 2), int(native_res[1] / 2 + 100))).topleft
@@ -380,27 +381,33 @@ def destroyLevel(Groups):
 # Procedure that applies the settings passed into it
 def apply_settings(settings):
     global resolution
+    global scale_res
+    global origin
     global xpos_f
     global ypos_f
     # Changes scale and position factors depending on resolution
     temp_list = settings["resolution"].split("x")
     resolution = (int(temp_list[0]), int(temp_list[1]))
-    xpos_f = resolution[0]/1920
-    ypos_f = resolution[1]/1080
-    set_scale(xpos_f, ypos_f)
+    scale_res = find_res(resolution)
+    origin = (round(resolution[0]/2-(scale_res[0]/2)), round(resolution[1]/2-scale_res[1]/2))
+    xpos_f = scale_res[0]/1024
+    ypos_f = scale_res[1]/768
+    set_screen_settings(xpos_f, ypos_f, origin)
     # Turns on or off fullscreen
     global Window
     if settings["fullscreen"] == True:
-        Window = pygame.display.set_mode(resolution, pygame.FULLSCREEN)
+        Window = pygame.display.set_mode(resolution, pygame.HWSURFACE | pygame.FULLSCREEN)
     else:
         Window = pygame.display.set_mode(resolution)
 
 if __name__ == "__main__":
     ''' Loading Procedure '''
-    # Loading the Arcade Classic font at font size 42
-    subFont = pygame.font.Font("PressStart2P.ttf", 42)
+    # Loading font at font size 36
+    subFont = pygame.font.Font("PressStart2P.ttf", 36)
     # Loads the same font, but large for headers
-    headerFont = pygame.font.Font("PressStart2P.ttf", 120)
+    headerFont = pygame.font.Font("PressStart2P.ttf", 72)
+    # Fonts for labels
+    labelFont = pygame.font.Font("PressStart2P.ttf", 30)
     # Loads the hearts sprite sheet
     HeartSheet = pygame.image.load("images\Hearts.png")
     # Loads the
@@ -411,14 +418,14 @@ if __name__ == "__main__":
     ''' Class instances '''
     # Menus
     Main = Menu("main", [
-        Image("main title", 480, 100, headerFont.render("Wave Run", False, (0,198,255))),
-        Button("start", 710, 300, inactiveStartButton, activeStartButton, pressStartButton),
-        Button("load", 710, 400, inactiveLoadButton, activeLoadButton, pressLoadButton),
-        Button("level select", 710, 500, inactiveLevelButton, activeLevelButton, pressLevelButton),
-        Button("tutorial", 710, 600, inactiveTutorialButton, activeTutorialButton, pressTutorialButton),
-        Button("score", 710, 700, inactiveScoreButton, activeScoreButton, pressScoreButton),
-        Button("setting", 710, 800, inactiveSettingButton, activeSettingButton, pressSettingButton),
-        Button("quit", 710, 900, inactiveQuitButton, activeQuitButton, pressQuitButton)
+        Image("main title", 223, 64, headerFont.render("Wave Run", False, (0,198,255))),
+        Button("start", 326, 188, inactiveStartButton, activeStartButton, pressStartButton),
+        Button("load", 326, 266, inactiveLoadButton, activeLoadButton, pressLoadButton),
+        Button("level select", 326, 344, inactiveLevelButton, activeLevelButton, pressLevelButton),
+        Button("tutorial", 326, 422, inactiveTutorialButton, activeTutorialButton, pressTutorialButton),
+        Button("score", 326, 500, inactiveScoreButton, activeScoreButton, pressScoreButton),
+        Button("setting", 326, 578, inactiveSettingButton, activeSettingButton, pressSettingButton),
+        Button("quit", 326, 656, inactiveQuitButton, activeQuitButton, pressQuitButton)
     ], {"A": {"left": "A", "right": "A", "up": "G", "down": "B", "obj name": "start"},
         "B": {"left": "B", "right": "B", "up": "A", "down": "C", "obj name": "load"},
         "C": {"left": "C", "right": "C", "up": "B", "down": "D", "obj name": "level select"},
@@ -427,70 +434,70 @@ if __name__ == "__main__":
         "F": {"left": "F", "right": "F", "up": "E", "down": "G", "obj name": "setting"},
         "G": {"left": "G", "right": "G", "up": "F", "down": "A", "obj name": "quit"}
         }, pointerSurf=blackRightArrow)
-    unavailableText = subFont.render("This feature is not yet available", False, BLACK)
+    unavailableText = labelFont.render("This feature is not yet available", False, BLACK)
 
     Settings = Menu("settings menu", [
-        Image("setting title", 144, 67, settingsTitle),
-        Image("graphics label", 144, 228, GraphicsText),
-        Image("res label", 189, 327, ResolutionText),
-        Image("fullscreen label", 189, 421, FullscreenText),
-        Image("audio title", 144, 547, AudioText),
-        Image("music label", 189, 653, MusicText),
-        Image("sfx label", 189, 812, SFXText),
-        Image("gameplay title", 1087, 228, GameplayText),
-        Image("control label", 1148, 315, ControlsText),
-        Image("left label", 1259, 405, LeftText),
-        Image("right label", 1259, 484, RightText),
-        Image("jump label", 1259, 568, JumpText),
-        Image("difficulty label", 1167, 681, DifficultyText),
-        TickBox("fullscreen tick", 700, 409, tickBoxOffSurf, tickBoxOnSurf, state=settings_dict["fullscreen"]),
-        Slider("music slider", 202, 709, 870, (0, 100), 10, sliderPointerSurfH, slideSurfH, settings_dict["music vol"]),
-        Slider("sfx slider", 202, 868, 870, (0, 100), 10, sliderPointerSurfH, slideSurfH, settings_dict["sfx vol"]),
-        Button("set left button", 1515, 391, WhiteButton, WhiteButton, WhiteButton),
-        Button("set right button", 1515, 474, WhiteButton, WhiteButton, WhiteButton),
-        Button("set jump button", 1515, 560, WhiteButton, WhiteButton, WhiteButton),
-        Button("default", 800, 947, inactiveDefaultButton, activeDefaultButton, pressDefaultButton),
-        Button("apply", 1170, 947, inactiveApplyButton, activeApplyButton, pressApplyButton),
-        Button("back", 1543, 947, inactiveBackButton, activeBackButton, pressBackButton),
-        DropMenu("res list", 700, 315, subFont, avail_resmodes, lineSurf,
+        Image("setting title", 47, 26, settingsTitle),
+        Image("graphics label", 36, 132, GraphicsText),
+        Image("res label", 36, 188, ResolutionText),
+        Image("fullscreen label", 36, 241, FullscreenText),
+        Image("audio title", 36, 295, AudioText),
+        Image("music label", 36, 347, MusicText),
+        Image("sfx label", 36, 399, SFXText),
+        Image("gameplay title", 36, 454, GameplayText),
+        Image("control label", 137, 504, ControlsText),
+        Image("left label", 32, 549, LeftText),
+        Image("right label", 32, 592, RightText),
+        Image("jump label", 32, 628, JumpText),
+        Image("difficulty label", 578, 504, DifficultyText),
+        TickBox("fullscreen tick", 765, 250, tickBoxOffSurf, tickBoxOnSurf, state=settings_dict["fullscreen"]),
+        Slider("music slider", 425, 347, 570, (0, 100), 10, sliderPointerSurfH, slideSurfH, settings_dict["music vol"]),
+        Slider("sfx slider", 425, 399, 570, (0, 100), 10, sliderPointerSurfH, slideSurfH, settings_dict["sfx vol"]),
+        Button("set left button", 256, 548, WhiteButton, WhiteButton, WhiteButton),
+        Button("set right button", 256, 588, WhiteButton, WhiteButton, WhiteButton),
+        Button("set jump button", 256, 628, WhiteButton, WhiteButton, WhiteButton),
+        Button("default", 255, 700, inactiveDefaultButton, activeDefaultButton, pressDefaultButton),
+        Button("apply", 525, 700, inactiveApplyButton, activeApplyButton, pressApplyButton),
+        Button("back", 795, 700, inactiveBackButton, activeBackButton, pressBackButton),
+        DropMenu("difficulty list", 659, 549, labelFont, ["Easy", "Normal", "Hard", "Extreme"], lineSurf,
+                 sliderPointerSurfV, slideSurfV),
+        DropMenu("res list", 700, 188, labelFont, avail_resmodes, lineSurf,
                  sliderPointerSurfV, slideSurfV, current_index=avail_resmodes.index(default_settings["resolution"]),
-                 lines=9),
-        DropMenu("difficulty list", 1259, 769, subFont, ["Easy", "Normal", "Hard", "Extreme"], lineSurf,
-                 sliderPointerSurfV, slideSurfV)
+                 lines=9)
     ], {
-        "A": {"left": "B", "right": "B", "up": "I", "down": "C", "obj name": "res list"},
-        "B": {"left": "C", "right": "C", "up": "K", "down": "D", "obj name": "set left button"},
-        "C": {"left": "B", "right": "B", "up": "A", "down": "F", "obj name": "fullscreen tick"},
-        "D": {"left": "C", "right": "C", "up": "B", "down": "E", "obj name": "set right button"},
-        "E": {"left": "C", "right": "E", "up": "D", "down": "G", "obj name": "set jump button"},
-        "F": {"left": "G", "right": "G", "up": "C", "down": "H", "obj name": "music slider"},
-        "G": {"left": "F", "right": "F", "up": "E", "down": "J", "obj name": "difficulty list"},
-        "H": {"left": "G", "right": "G", "up": "F", "down": "I", "obj name": "sfx slider"},
-        "I": {"left": "K", "right": "J", "up": "H", "down": "A", "obj name": "default"},
-        "J": {"left": "I", "right": "K", "up": "G", "down": "B", "obj name": "apply"},
-        "K": {"left": "J", "right": "I", "up": "G", "down": "B", "obj name": "back"}
+        "A": {"left": "A", "right": "A", "up": "K", "down": "C", "obj name": "res list"},
+        "B": {"left": "G", "right": "G", "up": "H", "down": "D", "obj name": "set left button"},
+        "C": {"left": "C", "right": "C", "up": "A", "down": "F", "obj name": "fullscreen tick"},
+        "D": {"left": "G", "right": "G", "up": "B", "down": "E", "obj name": "set right button"},
+        "E": {"left": "G", "right": "G", "up": "D", "down": "I", "obj name": "set jump button"},
+        "F": {"left": "F", "right": "F", "up": "C", "down": "H", "obj name": "music slider"},
+        "G": {"left": "B", "right": "B", "up": "H", "down": "K", "obj name": "difficulty list"},
+        "H": {"left": "H", "right": "H", "up": "F", "down": "B", "obj name": "sfx slider"},
+        "I": {"left": "K", "right": "J", "up": "E", "down": "A", "obj name": "default"},
+        "J": {"left": "I", "right": "K", "up": "G", "down": "A", "obj name": "apply"},
+        "K": {"left": "J", "right": "I", "up": "G", "down": "A", "obj name": "back"}
         }, settingsBkgd, pointerSurf=blackRightArrow)
 
     Shop = Menu("shop", [
-        Image("shop title", 795, 265, shopTitle),
-        Image("max health", 346, 373, maxHealth),
-        Image("max speeds", 346, 458, maxSpeeds),
-        Image("acceleration", 346, 548, Acceleration),
-        Image("strength", 346, 629, Strength),
-        Image("defence", 346, 723, Defence),
-        Image("gold", 346, 830, Gold),
-        Button("hp down", 920, 369, inactiveLeftButton, activeLeftButton, pressLeftButton),
-        Button("hp up", 1400, 369, inactiveRightButton, activeRightButton, pressRightButton),
-        Button("speed down", 920, 454, inactiveLeftButton, activeLeftButton, pressLeftButton),
-        Button("speed up", 1400, 454, inactiveRightButton, activeRightButton, pressRightButton),
-        Button("acc down", 920, 544, inactiveLeftButton, activeLeftButton, pressLeftButton),
-        Button("acc up", 1400, 544, inactiveRightButton, activeRightButton, pressRightButton),
-        Button("str down", 920, 625, inactiveLeftButton, activeLeftButton, pressLeftButton),
-        Button("str up", 1400, 625, inactiveRightButton, activeRightButton, pressRightButton),
-        Button("def down", 920, 719, inactiveLeftButton, activeLeftButton, pressLeftButton),
-        Button("def up", 1400, 719, inactiveRightButton, activeRightButton, pressRightButton),
-        Button("reset", 980, 830, inactiveResetButton, activeResetButton, pressResetButton),
-        Button("continue", 1270, 830, inactiveContinueButton, activeContinueButton, pressContinueButton)
+        Image("shop title", 375, 80, shopTitle),
+        Image("max health", 49, 166, maxHealth),
+        Image("max speeds", 49, 232, maxSpeeds),
+        Image("acceleration", 49, 302, Acceleration),
+        Image("strength", 49, 372, Strength),
+        Image("defence", 49, 438, Defence),
+        Image("gold", 49, 634, Gold),
+        Button("hp down", 455, 159, inactiveLeftButton, activeLeftButton, pressLeftButton),
+        Button("hp up", 809, 159, inactiveRightButton, activeRightButton, pressRightButton),
+        Button("speed down", 455, 227, inactiveLeftButton, activeLeftButton, pressLeftButton),
+        Button("speed up", 809, 227, inactiveRightButton, activeRightButton, pressRightButton),
+        Button("acc down", 455, 295, inactiveLeftButton, activeLeftButton, pressLeftButton),
+        Button("acc up", 809, 295, inactiveRightButton, activeRightButton, pressRightButton),
+        Button("str down", 455, 363, inactiveLeftButton, activeLeftButton, pressLeftButton),
+        Button("str up", 809, 363, inactiveRightButton, activeRightButton, pressRightButton),
+        Button("def down", 455, 432, inactiveLeftButton, activeLeftButton, pressLeftButton),
+        Button("def up", 809, 432, inactiveRightButton, activeRightButton, pressRightButton),
+        Button("reset", 481, 634, inactiveResetButton, activeResetButton, pressResetButton),
+        Button("continue", 712, 634, inactiveContinueButton, activeContinueButton, pressContinueButton)
     ], {"A": {"left": "B", "right": "B", "up": "K", "down": "C", "obj name": "hp down"},
         "B": {"left": "A", "right": "A", "up": "L", "down": "D", "obj name": "hp up"},
         "C": {"left": "D", "right": "D", "up": "A", "down": "E", "obj name": "speed down"},
@@ -506,14 +513,14 @@ if __name__ == "__main__":
                                 }, bkgSurf, pointerSurf=blackRightArrow)
 
     loseMenu = Menu("lose menu", [
-        Button("main button", 450, 800, inactiveMainButton, activeMainButton, pressMainButton),
-        Button("retry button", 1100, 800, inactiveRetryButton, activeRetryButton, pressRetryButton),
-        Image("lose title", 428, 488, headerFont.render("Game Over", False, WHITE))
+        Button("main button", 140, 500, inactiveMainButton, activeMainButton, pressMainButton),
+        Button("retry button", 560, 500, inactiveRetryButton, activeRetryButton, pressRetryButton),
+        Image("lose title", 188, 348, headerFont.render("Game Over", False, WHITE))
     ], {"A": {"left": "B", "right": "B", "up": "A", "down": "A", "obj name": "main button"},
         "B": {"left": "A", "right": "A", "up": "B", "down": "B", "obj name": "retry button"}
         }, pygame.Surface(native_res), pointerSurf=greenRightArrow)
 
-    pauseButton = Button("pause", 1880, 0, pauseButtonSurf, pauseButtonSurf, pauseButtonSurf)
+    pauseButton = Button("pause", 994, 0, pauseButtonSurf, pauseButtonSurf, pauseButtonSurf)
 
     gui_list = [Main, Settings, Shop, loseMenu, pauseButton]
     # Updates settings
@@ -566,7 +573,7 @@ if __name__ == "__main__":
                     tell = True
             Main.draw()     # All objects in main menu are drawn
             if tell:
-                Frame.blit(unavailableText, (0, 1030))
+                Frame.blit(unavailableText, (0, 738))
 
         # Settings menu
         elif mode == "settings":
@@ -661,36 +668,36 @@ if __name__ == "__main__":
             Settings.draw()
             if action_bind == "left":
                 if bind_time <= 5000:
-                    label = subFont.render(str(int(bind_time/1000)+1)+"...", False, BLACK)
+                    label = labelFont.render(str(int(bind_time/1000)+1)+"...", False, BLACK)
                 else:
-                    label = subFont.render("Key Used", False, BLACK)
+                    label = labelFont.render("Key Used", False, BLACK)
             else:
-                label = subFont.render(pygame.key.name(settings_dict["left key"]), False, BLACK)
+                label = labelFont.render(pygame.key.name(settings_dict["left key"]), False, BLACK)
             pos = list(label.get_rect(midleft=Settings.find_obj("set left button").rect.midleft).topleft)
             pos[0] += 10
             Frame.blit(label, pos)
             if action_bind == "right":
                 if bind_time <= 5000:
-                    label = subFont.render(str(int(bind_time/1000)+1)+"...", False, BLACK)
+                    label = labelFont.render(str(int(bind_time/1000)+1)+"...", False, BLACK)
                 else:
-                    label = subFont.render("Key Used", False, BLACK)
+                    label = labelFont.render("Key Used", False, BLACK)
             else:
-                label = subFont.render(pygame.key.name(settings_dict["right key"]), False, BLACK)
+                label = labelFont.render(pygame.key.name(settings_dict["right key"]), False, BLACK)
             pos = list(label.get_rect(midleft=Settings.find_obj("set right button").rect.midleft).topleft)
             pos[0] += 10
             Frame.blit(label, pos)
             if action_bind == "jump":
                 if bind_time <= 5000:
-                    label = subFont.render(str(int(bind_time / 1000) + 1)+"...", False, BLACK)
+                    label = labelFont.render(str(int(bind_time / 1000) + 1)+"...", False, BLACK)
                 else:
-                    label = subFont.render("Key Used", False, BLACK)
+                    label = labelFont.render("Key Used", False, BLACK)
             else:
-                label = subFont.render(pygame.key.name(settings_dict["jump key"]), False, BLACK)
+                label = labelFont.render(pygame.key.name(settings_dict["jump key"]), False, BLACK)
             pos = list(label.get_rect(midleft=Settings.find_obj("set jump button").rect.midleft).topleft)
             pos[0] += 10
             Frame.blit(label, pos)
-            note = subFont.render("Note: Currently no sound or difficulty settings", False, BLACK)
-            Frame.blit(note, (10, native_res[1] - note.get_height()))
+            #note = labelFont.render("Note: Currently no sound or difficulty settings", False, BLACK)
+            #Frame.blit(note, (10, native_res[1] - note.get_height()))
 
         # Gameplay mode
         elif mode == "play":
@@ -937,10 +944,12 @@ if __name__ == "__main__":
                 inputs["key"].remove(pygame.K_RETURN)
 
         # Shows fps
-        fps = subFont.render(str(int(Clock.get_fps())), False, GREEN, BLACK)
+        fps = labelFont.render(str(int(Clock.get_fps())), False, GREEN, BLACK)
+        fps.set_alpha(128)
         Frame.blit(fps, (0, 0))
-        FrameToRender = pygame.transform.scale(Frame, resolution)
-        Window.blit(FrameToRender, (0,0))
+        # Final frame is scaled to output resolution
+        FrameToRender = pygame.transform.scale(Frame, scale_res)
+        Window.blit(FrameToRender, origin)
         # The window is updated
         pygame.display.flip()
         # Clock object restricts the game to the set ticks per second
