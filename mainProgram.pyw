@@ -214,15 +214,13 @@ class HUD(object):
             y = self.effectLabel.get_rect(topleft=(360, 16)).midbottom[1] + 8
             spriteRect.midtop = (x, y)
             effectSurf = pygame.Surface(spriteRect.size)
+            #effectSurf.fill(WHITE)
             for i in range(len(effect_list)):
                 if effect_list[i] == "fast":
-                    pygame.draw.rect(effectSurf, WHITE, fastSprite.get_rect(topleft=(70 * i, 0)))
                     effectSurf.blit(fastSprite, (70 * i, 0))
                 elif effect_list[i] == "slow":
-                    pygame.draw.rect(effectSurf, WHITE, slowSprite.get_rect(topleft=(70 * i, 0)))
                     effectSurf.blit(slowSprite, (70 * i, 0))
                 elif effect_list[i] == "knockout":
-                    pygame.draw.rect(effectSurf, WHITE, koSprite.get_rect(topleft=(70 * i, 0)))
                     effectSurf.blit(koSprite, (70 * i, 0))
             screen.blit(effectSurf, spriteRect.topleft)
         # Draws the progress label
@@ -320,64 +318,72 @@ def buildLevel(map, metadata, tile_dim, Groups):
             elif tile == "#":
                 platform = Platform(name, pos[0], pos[1], tile_dim[0], tile_dim[1],
                                     image=crop(PlatformSheet, (0, 0), (40, 40)))
-                for Group in (Drawables, Collidables, Platforms):
+                for Group in (Collidables, Platforms):
                     Group.add(platform)
+                Drawables.add(platform, layer=2)
             elif tile == "C":
                 coin = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], rand.randint(5, 20), ["money", 1, 0],
                             frames=coin_frames, fps=8)
-                for Group in (Drawables, Collidables):
-                    Group.add(coin)
+                Collidables.add(coin)
+                Drawables.add(coin, layer=3)
             elif tile == "T":
                 chest = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], rand.randint(25, 50),
                              ["money", 20, 0], image=crop(EntitySheet, (40, 0), (40, 40)))
-                for Group in (Drawables, Collidables):
-                    Group.add(chest)
+                Collidables.add(chest)
+                Drawables.add(chest, layer=3)
             elif tile == "B":
                 bandage = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 0, ["health", 1, 0],
                                image=crop(EntitySheet, (80, 0), (40, 40)))
-                for Group in (Drawables, Collidables):
-                    Group.add(bandage)
+                Collidables.add(bandage)
+                Drawables.add(bandage, layer=3)
             elif tile == "M":
                 medkit = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 0, ["health", 999, 0],
                               image=crop(EntitySheet, (0, 40), (40, 40)))
-                for Group in (Drawables, Collidables):
-                    Group.add(medkit)
+                Collidables.add(medkit)
+                Drawables.add(medkit, layer=3)
             elif tile == "R":
                 rum = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], rand.randint(50, 100),
                            [["health", 2, 0], ["slow", 150, 10000]], image=crop(EntitySheet, (40, 40), (40, 40)))
-                for Group in (Drawables, Collidables):
-                    Group.add(rum)
+                Collidables.add(rum)
+                Drawables.add(rum, layer=3)
             elif tile == "H":
                 horse = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], rand.randint(100, 200),
                              ["fast", 240, 15000], image=crop(EntitySheet, (80, 40), (40, 40)))
-                for Group in (Drawables, Collidables):
-                    Group.add(horse)
+                Collidables.add(horse)
+                Drawables.add(horse, layer=3)
             elif tile == "A":
                 anchor = Obstacle(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 1, 200, 4000,
                                   image=crop(EntitySheet, (0, 80), (40, 40)))
-                for Group in (Drawables, Collidables):
-                    Group.add(anchor)
+                Collidables.add(anchor)
+                Drawables.add(anchor, layer=3)
             elif tile == "N":
                 barrel = Obstacle(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 1, 200, 3000,
                                   image=crop(EntitySheet, (40, 80), (40, 40)))
-                for Group in (Drawables, Collidables):
-                    Group.add(barrel)
+                Collidables.add(barrel)
+                Drawables.add(barrel, layer=3)
             elif tile == "O":
                 crate = Obstacle(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 1, 200, 2000,
                                  image=crop(EntitySheet, (80, 80), (40, 40)))
-                for Group in (Drawables, Collidables):
-                    Group.add(crate)
+                Collidables.add(crate)
+                Drawables.add(crate, layer=3)
+            elif tile == "S":
+                dock = ShipDock(name, pos[0], pos[1], 40, 40, 1000, 10000, 100000, 1000, dock_color=GREEN,
+                                 ship_w=400, ship_h=200, ship_color=BLUE)
+                dock.ship_on_water(int(metadata["height"])*tile_dim[1])
+                Drawables.add(dock, layer=3)
+                Collidables.add(dock)
+                dock.ship_drawable(Drawables)
             elif tile == "P":
                 global playerSprite
-                playerSprite.move_to(pos[0], pos[1])
+                playerSprite.set_pos(pos[0], pos[1])
                 playerSprite.clear_effects()
                 playerSprite.set_vel(0, 0)
-                for Group in (Drawables, playerGroup):
-                    Group.add(playerSprite)
+                playerGroup.add(playerSprite)
+                Drawables.add(playerSprite, layer=1)
             elif tile == "E":
                 enemy = Enemy(name, pos[0], pos[1], tile_dim[0], tile_dim[1], (255, 0, 255), 3, 2, 0.4, 2, 100, 300)
-                for Group in (Drawables, Collidables):
-                    Group.add(enemy)
+                Collidables.add(enemy)
+                Drawables.add(enemy, layer=3)
 
 # Removes all the objects in the passed Groups and their names
 def destroyLevel(Groups):
@@ -753,7 +759,7 @@ if __name__ == "__main__":
                 EndArea = pygame.Rect(end_pos, end_area)
                 buildLevel(Map, Metadata, tile_dim, (Drawables, playerGroup, Collidables, Platforms))
                 Wave = Tsunami("wave", -length*tile_dim[0], 0, length*tile_dim[0], height*tile_dim[0], BLUE, 5, 5000)
-                Drawables.add(Wave)
+                Drawables.add(Wave, layer=4)
                 Collidables.add(Wave)
                 GameCam = Camera(native_res, (length*tile_dim[0], height*tile_dim[1]))
                 tile_progress = 0
@@ -799,9 +805,8 @@ if __name__ == "__main__":
                         inputs["key"].remove(attack_key)
                         if rand.random() <= 1/5:
                             attack_key = rand.randint(97, 122)
-                    if rand.random() <= 1/60:
-                        attack = enemy_sp * (1 - player_ap)
-                        progress -= attack
+                    attack = (enemy_sp * (1 - player_ap))*(Clock.get_time()/1000)
+                    progress -= attack
                     if progress <= -player_hp:
                         enemy.player_lose(playerSprite)
                         playerSprite.set_opponent(None)
@@ -811,15 +816,16 @@ if __name__ == "__main__":
                         playerSprite.set_opponent(None)
                         combat_init = False
                     # Drawing code
-                    KeySignal = headerFont.render(chr(attack_key).upper(), False, YELLOW)
-                    Back = pygame.Rect((0, 0), (100, 100))
-                    Back.center = KeySignal.get_rect(topleft=(512-int(KeySignal.get_width()/2), 250)).center
-                    CombatBar = pygame.Surface((800, 50))
-                    progress_pos = int(800*((player_hp+progress)/(player_hp+enemy_hp)))
-                    neutral_pos = int(800*(player_hp/(player_hp+enemy_hp)))
-                    CombatBar.fill(RED)
-                    CombatBar.fill(WHITE, pygame.Rect(neutral_pos-1, 0, 2, 50))
-                    Pointer = pygame.Rect(112+progress_pos-1, 380, 2, 70)
+                    if combat_init:
+                        KeySignal = headerFont.render(chr(attack_key).upper(), False, YELLOW)
+                        Back = pygame.Rect((0, 0), (100, 100))
+                        Back.center = KeySignal.get_rect(topleft=(512-int(KeySignal.get_width()/2), 250)).center
+                        CombatBar = pygame.Surface((800, 50))
+                        progress_pos = int(800*((player_hp+progress)/(player_hp+enemy_hp)))
+                        neutral_pos = int(800*(player_hp/(player_hp+enemy_hp)))
+                        CombatBar.fill(RED)
+                        CombatBar.fill(WHITE, pygame.Rect(neutral_pos-1, 0, 2, 50))
+                        Pointer = pygame.Rect(112+progress_pos-1, 380, 2, 70)
                 if pygame.K_ESCAPE in inputs["key"]:
                     pause = True
                     inputs["key"].remove(pygame.K_ESCAPE)

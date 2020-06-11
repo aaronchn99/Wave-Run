@@ -1,3 +1,27 @@
+0.6.6.2
+- Changed combat system
+	- Enemy attacks at a constant rate
+- Player falls at exactly max speed if exceeded
+- Player methods
+	- Toggle movement
+	- Toggle noclip
+	- Toggle invisibility
+	- Allow high speed
+- Special Items class
+- Ship Dock class
+- Game sprites arranged in layers in Drawables Group:
+	- Player and ships on layer 1
+	- Platforms on layer 2
+	- Items, Obstacles and Enemies on layer 3
+	- Wave sprite on layer 4
+Known Bugs
+1. Game crashes when level is cleared with invincibility
+2. Dock life starts to count down once level is loaded
+3. Occasionally shows desktop and taskbar
+4. No way to know when Ship is about to leave
+5. When ship reaches end of level, player does not leave, game freezes
+6. Button selection in combat system is very random
+
 0.6.6.1
 - Added back colour behind effect sprites
 - Added Wave pointer on progress bar

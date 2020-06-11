@@ -97,12 +97,18 @@ class Entity(pygame.sprite.Sprite):
 
 
 
-    # Animates the entity by changing the current frame
+    # Animates the entity by changing the current frame (Does not draw the frame)
     def animate(self):
         self._current_frame += self._animate_fps * Clock.get_time()/1000
         if self._current_frame >= len(self._frames):
             self._current_frame = 0
         self.image = self._frames[int(self._current_frame)]
+
+
+
+    # Returns the rendering mode (color/image/animate/black)
+    def get_render_mode(self):
+        return self._render_mode
 
 
 
@@ -210,6 +216,165 @@ class Item(Entity):
             # Returns nothing in order to break out of the method
             return None
 
+
+
+
+# Item which required more than adding an effect to the player
+class SpecialItem(Item):
+
+
+
+    # Class constructor
+    def __init__(self, name, x, y, width, height, points, life_time, effects = (), color=None, image=None, frames=None, fps=1, current_frame=0):
+        super().__init__(name, x, y, width, height, points, effects, color, image, frames, fps, current_frame)
+        self._life_time = life_time
+
+
+
+    # Counts down the item's time until it is removed from the level
+    def lifeCountdown(self):
+        self._life_time -= Clock.get_time()
+
+
+
+
+# Special Item which allows the player to move past a certain distance of the level
+class ShipDock(SpecialItem):
+
+
+
+    # Class constructor
+    def __init__(self, name, x, y, width, height, points, wait_time, sail_time, speed, effects = (),
+                 dock_color=None, dock_image=None, dock_frames=None, dock_fps=1, dock_current_frame=0,
+                 ship_w=0, ship_h=0, ship_color=None, ship_image=None, ship_frames=None, ship_fps=1, ship_current_frame=0):
+        super().__init__(name, x, y, width, height, points, wait_time, effects, dock_color, dock_image, dock_frames,
+                         dock_fps, dock_current_frame)
+        self._sailing = False
+        self._sail_time = sail_time
+        self._speed = speed
+        if ship_image != None:
+            ship_w = ship_image.get_width()
+            ship_h = ship_image.get_height()
+        elif ship_frames != None:
+            frame = ship_frames[0]
+            ship_w = frame.get_width()
+            ship_h = frame.get_height()
+        ship_x = x - (ship_w/2) + (width/2)
+        self._shipEntity = Entity(name + "Ship", ship_x, 0, ship_w, ship_h, ship_color, ship_image, ship_frames,
+                                  ship_fps, ship_current_frame)
+        self._ship_alive = True
+
+
+
+    # Sets the ship on the bottom of the level
+    def ship_on_water(self, sea_level):
+        pos = list(self._shipEntity.get_pos())
+        pos[1] = sea_level - self._shipEntity.rect.height
+        self._shipEntity.set_pos(pos[0], pos[1])
+
+
+
+    # Makes ship drawable by adding it into drawables group
+    def ship_drawable(self, drawablesGroup):
+        drawablesGroup.add(self._shipEntity, layer=1)
+
+
+
+    # Counts down journey duration
+    def sail_timer(self):
+        self._sail_time -= Clock.get_time()
+
+
+
+    # Moves the ship depending on its speed
+    def move_ship(self):
+        pos = list(self._shipEntity.get_pos())
+        dt = Clock.get_time()
+        pos[0] = pos[0] + (self._speed * (dt/1000))
+        self._shipEntity.set_pos(pos[0], pos[1])
+
+
+
+    # Makes the ship sail off screen, where it will disappear
+    def sail_away(self):
+        if self._shipEntity.get_pos()[0] < native_res[0]:
+            self.move_ship()
+            return False
+        else:
+            remove_name(self._shipEntity.get_name())
+            self._shipEntity.kill()
+            self._ship_alive = False
+            return True
+
+
+
+    # Called when dock life runs out
+    def when_life_time_out(self):
+        return self.sail_away()
+
+
+
+    # Called when the player collides with the dock item
+    def whenCollide(self, Player):
+        self._sailing = True
+        self.add_points()
+        Player.toggle_movement()
+        Player.toggle_noclip()
+        Player.toggle_transparency()
+        pos = self._shipEntity.rect.center
+        Player.set_pos(pos[0], pos[1])
+
+
+
+    # Called while player is sailing on ship
+    def while_sail(self, Player):
+        pos = self._shipEntity.rect.center
+        Player.set_pos(pos[0], pos[1])
+
+
+
+    # Called when ship journey ends
+    def when_sail_time_out(self, Player):
+        self._sailing = False
+        Player.toggle_movement()
+        Player.toggle_noclip()
+        Player.toggle_transparency()
+        Player.trigger_invincibility(3000)
+        return self.sail_away()
+
+
+
+    # Update method
+    def update(self, collide_list, player):
+        if self._life_time > 0:                         # When dock item not yet expired
+            # Checks if player collides with dock if not yet sailing
+            if not self._sailing:
+                if self.get_name() in collide_list:
+                    # Player sails with ship if colliding with dock
+                    self.whenCollide(player)
+                    self._sailing = True
+                self.lifeCountdown()                    # Counts down dock's life time
+            # If sailing
+            else:
+                # Keep on sailing if sail time isn't expired
+                if self._sail_time > 0:
+                    self.move_ship()
+                    self.while_sail(player)
+                    self.sail_timer()
+                # Ship sails away and dock kills itself when sail time runs out
+                else:
+                    if self.when_sail_time_out(player):
+                        self.kill()
+        # Ship sails away and dock kills itself when life time runs out
+        else:
+            if self.when_life_time_out():
+                self.kill()
+        # Animates ship if it can
+        if self._shipEntity.get_render_mode() == "animate":
+            self._shipEntity.animate()
+        # Animates dock if it can
+        if self.get_render_mode() == "animate":
+            self.animate()
 
 
 
@@ -402,9 +567,12 @@ class playerClass(Character):
         self._dy = 0
         self._hold_duration = 350
         self._can_jump = False
+        self._can_move = True
         self._opponent = None
+        self._noclip = False
         self._invincible = False
         self._invincible_time = 0
+        self._transparent = False
         self._active_effects = []
         self._frame = self.image
 
@@ -439,18 +607,20 @@ class playerClass(Character):
         # Likewise, if left and right keys are pressed, the player stops moving horizontally
         elif left_key in inputs["key"] and right_key in inputs["key"]:
             self._dx = 0
-        self.move_to(self._x + self._dx * dt, self._y)       # The horizontal movement is applied
+        self.set_pos(self._x + self._dx * dt, self._y)       # The horizontal movement is applied
 
-        # Collision code
-        for platform in platform_list:      # Iterates through each platform rect
-            # Tests if the player is moving horizontally and colliding with the selected platform
-            if self.rect.colliderect(platform) and self._dx != 0:
-                if self._dx < 0:                                                # If player moves to the left
-                    self.move_to(platform.right, self._y)                       # Moved to the right edge of platform
-                if self._dx > 0:                                                # If player moves to the right
-                    self.move_to(platform.left - self.rect.width, self._y)      # Moved to the left edge of platform
-                if self.rect.collidelist(platform_list) == -1:                  # If player overlaps any platform
-                    self.set_vel(0, self._dy)                                   # Stops moving horizontally
+        # Platforms collidable if noclip turned off
+        if not self._noclip:
+            # Collision code
+            for platform in platform_list:      # Iterates through each platform rect
+                # Tests if the player is moving horizontally and colliding with the selected platform
+                if self.rect.colliderect(platform) and self._dx != 0:
+                    if self._dx < 0:                                                # If player moves to the left
+                        self.set_pos(platform.right, self._y)                       # Moved to the right edge of platform
+                    if self._dx > 0:                                                # If player moves to the right
+                        self.set_pos(platform.left - self.rect.width, self._y)      # Moved to the left edge of platform
+                    if self.rect.collidelist(platform_list) == -1:                  # If player overlaps any platform
+                        self.set_vel(0, self._dy)                                   # Stops moving horizontally
 
 
         ''' Vertical movement '''
@@ -469,26 +639,30 @@ class playerClass(Character):
             self._hold_duration = 0                                 # Hold duration set to 0
             if self._dy < self._max_dy and Ghost.collidelist(platform_list) == -1:
                 self._dy += g * dt                                       # Player falls if not on platform
+            if self._dy >= self._max_dy:
+                self._dy = self._max_dy                # Vertical velocity set to max velocity if exceeded
 
         # If player on platform and jump key not pressed, hold duration is reset and player can jump
         if Ghost.move(0, self._dy * dt).collidelist(platform_list) != -1 and jump_key not in inputs["key"]:
             self._hold_duration = 350
             self._can_jump = True
 
-        self.move_to(self._x, self._y + self._dy * dt)           # Vertical movement is applied
+        self.set_pos(self._x, self._y + self._dy * dt)           # Vertical movement is applied
 
-        # Collision code
-        for platform in platform_list:
-            # If player is moving upwards and overlapping the platform
-            if self._dy < 0 and self.rect.colliderect(platform):
-                new_y = platform.bottom                     # Player moved to bottom of platform
-                self.move_to(self._x, new_y)
-                self.set_vel(self._dx, g * dt)                   # Player set to fall
-            # If the player is moving downwards and overlapping the platform
-            elif self._dy > 0 and self.rect.colliderect(platform):
-                new_y = platform.top - self.rect.height     # Player set to top of platform
-                self.move_to(self._x, new_y)
-                self.set_vel(self._dx, 0)                   # Player stops moving vertically
+        # Platforms collidable if noclip turned off
+        if not self._noclip:
+            # Collision code
+            for platform in platform_list:
+                # If player is moving upwards and overlapping the platform
+                if self._dy < 0 and self.rect.colliderect(platform):
+                    new_y = platform.bottom                     # Player moved to bottom of platform
+                    self.set_pos(self._x, new_y)
+                    self.set_vel(self._dx, g * dt)                   # Player set to fall
+                # If the player is moving downwards and overlapping the platform
+                elif self._dy >= 0 and self.rect.colliderect(platform):
+                    new_y = platform.top - self.rect.height     # Player set to top of platform
+                    self.set_pos(self._x, new_y)
+                    self.set_vel(self._dx, 0)                   # Player stops moving vertically
 
 
         # This prevents the player from moving off the screen
@@ -499,18 +673,44 @@ class playerClass(Character):
 
 
 
+    # Toggles player's ability to move
+    def toggle_movement(self):
+        if self._can_move:
+            self._can_move = False
+        elif not self._can_move:
+            self._can_move = True
+
+
+
+    # Toggles player's ability to move
+    def toggle_noclip(self):
+        if self._noclip:
+            self._noclip = False
+        elif not self._noclip:
+            self._noclip = True
+
+
+
+    # Toggles player invisibility
+    def toggle_transparency(self):
+        if self._transparent:
+            self._transparent = False
+            self.image.set_alpha(255)
+        elif not self._transparent:
+            self._transparent = True
+            self.image.set_alpha(0)
+
+
+
+    # Allows the player to move at high velocities (When the player is launched)
+    def high_speed_caps(self):
+        self._max_dx, self._min_dx, self._max_dy, self._min_dy = 99999, 99999, 99999, 99999
+
+
+
     # Returns a tuple of the player's position plus dimensions
     def get_dim(self):
         return self._x, self._y, self.rect.width, self.rect.height
-
-
-
-    # Method which takes x and y coordinates and moves the player's rect object
-    # to this set of coordinates
-    def move_to(self, x, y):
-        self._x = x
-        self._y = y
-        self.update_pos()
 
 
 
@@ -700,6 +900,10 @@ class playerClass(Character):
     # Method to update the player sprite. Used by playerGroup. Returns the list of colliding
     # sprites with the player
     def update(self, inputs, collidables, platforms, playerGroup):
+        if not self._can_move:
+            for key in (left_key, right_key, jump_key):
+                if key in inputs["key"]:
+                    inputs["key"].remove(key)
         self.user_move(inputs, platforms)
         self.update_effect()
         if self._invincible:
@@ -718,6 +922,14 @@ class playerClass(Character):
         else:
             self.image.set_alpha(255)
             collide_list = self.collide_trigger(collidables, playerGroup)
+        if self._noclip:
+            waveGroup = pygame.sprite.Group()
+            for sprite in collidables:
+                if type(sprite).__name__ == "Tsunami":
+                    waveGroup.add(sprite)
+            collide_list = self.collide_trigger(waveGroup, playerGroup)
+        if self._transparent:
+            self.image.set_alpha(0)
         return collide_list
 
 
