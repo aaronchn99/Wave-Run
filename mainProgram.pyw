@@ -6,7 +6,7 @@ from MenuObjs import *
 import os
 import ctypes
 import pygame.freetype
-os.environ['SDL_VIDEO_WINDOW_POS'] = "100, 100"
+os.environ['SDL_VIDEO_WINDOW_POS'] = "100, 100" # Set window position, prevents window from being placed offscreen
 pygame.init()
 from Images import *
 import platform
@@ -19,30 +19,42 @@ pygame.display.set_mode(resolution)
 pygame.display.set_mode(resolution, pygame.FULLSCREEN)
 # Game program variables
 close = False
-mode = "main"
-loaded = False
-game_init = False
-shop_init = False
-combat_init = False
+mode = "main"           # Controls what screen to show
+loaded = False          # If level has loaded
+game_init = False       # If game environment has initialised (Player, HUD, Rects, Pause menu)
+shop_init = False       # If shop menu has initialised
+combat_init = False     # If combat UI has initialised
 pause = False
-action_bind = ""
-bind_time = 5000
+action_bind = ""        # Used by setting menu, indicates action to be bound
+bind_time = 5000        # Milliseconds before key binding is cancelled
 
 
 '''Classes'''
 class Camera(object):
+    # Camera handles scrolling of sprites, so that player is in center
+    # Params:
+    # cam_dim - Width & height of visible area (aka screen size)
+    # course_dim - Width & height of course
     def __init__(self, cam_dim, course_dim):
         self._camRect = pygame.Rect((0, 0), cam_dim)
         self._courseRect = pygame.Rect((0, 0), course_dim)
         self._vel = (0, 0)
 
+    # Query from player its displacement, set as scroll amount
+    # Params:
+    # player - The player sprite
     def set_scroll(self, player):
         self._vel = player.set_scroll(native_res)
-        self.checkOnBoundary()
+        self._checkOnBoundary()
 
-    def get_rect(self):
+    # Return Rect containing course
+    def get_course_rect(self):
         return self._courseRect
 
+    # Moves all sprites and Rects by scrolling amount
+    # Params:
+    # sprites - Pygame Group object containing all sprites
+    # endRect - Rect object representing the finish line
     def apply(self, sprites, endRect):
         dx, dy = round(self._vel[0], 0), round(self._vel[1], 0)
         self._courseRect.x += dx
@@ -52,8 +64,8 @@ class Camera(object):
         endRect.x += dx
         endRect.y += dy
 
-    # Prevents the screen to scroll past the course area
-    def checkOnBoundary(self):
+    # Adjusts scrolling amount to prevent the screen to scroll past the course area
+    def _checkOnBoundary(self):
         dx, dy = self._vel
         if self._courseRect.left + dx >= self._camRect.left:
             dx = self._camRect.left - self._courseRect.left
@@ -68,6 +80,7 @@ class Camera(object):
 
 class HUD(object):
     # Constructs the HUD for the first time
+    # Params: (See hud_update)
     def __init__(self, health, max_hp, money, score):
         # HUD background is rendered
         self.background = pygame.Surface((native_res[0], 208))
@@ -84,6 +97,14 @@ class HUD(object):
         self.hud_update(health, max_hp, money, score, [], 0, 0)
 
     # Update the values shown by the HUD
+    # Params:
+    # health - Player's current health
+    # max_hp - Player's maximum health
+    # money - Current money count
+    # score - Current points
+    # effects - List of effects currently applied to player
+    # player_progress - Player's position (as proportion of course)
+    # wave_progress - Wave's position (as proportion of wave)
     def hud_update(self, hp, max_hp, money, score, effects, player_progress, wave_progress):
         # Sets up the list of hearts
         # It is only set up if the health is larger than 0
@@ -401,23 +422,20 @@ if __name__ == "__main__":
     headerFont = pygame.font.Font("PressStart2P.ttf", 72)
     # Fonts for labels
     labelFont = pygame.font.Font("PressStart2P.ttf", 30)
-    # Loads the hearts sprite sheet
+    # Loading spritesheets
     HeartSheet = pygame.image.load("images\\Hearts.png")
-    # Loads the
     EffectSheet = pygame.image.load("images\\Effects.png")
-    # Loads and crops sprite images for items and obstacles
     EntitySheet = pygame.image.load("images\\ItemObstacles.png")
-    #
     PlatformSheet = pygame.image.load("images\\Platforms.png")
-    #
     CoinSheet = pygame.image.load("images\\Coin.png")
 
+    # Crop and arrange each frame of coin sprite
     coin_frames = []
     for i in range(8):
         coin_frames.append(crop(CoinSheet, (40*i, 0), (40, 40)))
 
     ''' Class instances '''
-    # Menus
+    # Main Menu components
     Main = Menu("main", [
         Image("main title", 223, 64, headerFont.render("Wave Run", False, (0,198,255))),
         Button("start", 326, 188, inactiveStartButton, activeStartButton, pressStartButton),
@@ -436,7 +454,7 @@ if __name__ == "__main__":
         "G": {"left": "G", "right": "G", "up": "F", "down": "A", "obj name": "quit"}
         }, pointerSurf=blackRightArrow)
     unavailableText = labelFont.render("This feature is not yet available", False, BLACK)
-
+    # Settings Menu components
     Settings = Menu("settings menu", [
         Image("setting title", 47, 26, settingsTitle),
         Image("graphics label", 36, 132, GraphicsText),
@@ -478,7 +496,7 @@ if __name__ == "__main__":
         "J": {"left": "I", "right": "K", "up": "G", "down": "A", "obj name": "apply"},
         "K": {"left": "J", "right": "I", "up": "G", "down": "A", "obj name": "back"}
         }, settingsBkgd, pointerSurf=blackRightArrow)
-
+    # Shop Menu components
     Shop = Menu("shop", [
         Image("shop title", 375, 80, shopTitle),
         Image("max health", 49, 166, maxHealth),
@@ -512,7 +530,7 @@ if __name__ == "__main__":
         "K": {"left": "L", "right": "L", "up": "I", "down": "A", "obj name": "reset"},
         "L": {"left": "K", "right": "K", "up": "J", "down": "B", "obj name": "continue"}
                                 }, bkgSurf, pointerSurf=blackRightArrow)
-
+    # The game over buttons
     loseMenu = Menu("lose menu", [
         Button("main button", 140, 500, inactiveMainButton, activeMainButton, pressMainButton),
         Button("retry button", 560, 500, inactiveRetryButton, activeRetryButton, pressRetryButton),
@@ -520,7 +538,7 @@ if __name__ == "__main__":
     ], {"A": {"left": "B", "right": "B", "up": "A", "down": "A", "obj name": "main button"},
         "B": {"left": "A", "right": "A", "up": "B", "down": "B", "obj name": "retry button"}
         }, pygame.Surface(native_res), pointerSurf=greenRightArrow)
-
+    # Pause button during gameplay
     pauseButton = Button("pause", 994, 0, pauseButtonSurf, pauseButtonSurf, pauseButtonSurf)
 
     gui_list = [Main, Settings, Shop, loseMenu, pauseButton]
@@ -752,11 +770,11 @@ if __name__ == "__main__":
                     GameCam.apply(Drawables, EndArea)
 
                     # The player's progress in the course is calculated
-                    progress = (playerSprite.get_pos()[0] - GameCam.get_rect().left)/(EndArea.left - GameCam.get_rect().left)
+                    progress = (playerSprite.get_pos()[0] - GameCam.get_course_rect().left)/(EndArea.left - GameCam.get_course_rect().left)
                     # The wave's progress in the course is calculated
-                    wave_progress = (Wave.rect.right - GameCam.get_rect().left)/(EndArea.left - GameCam.get_rect().left)
+                    wave_progress = (Wave.rect.right - GameCam.get_course_rect().left)/(EndArea.left - GameCam.get_course_rect().left)
                     # The player's tile position is calculated for the score_distance function
-                    player_pos = playerSprite.get_pos()[0] - GameCam.get_rect().left
+                    player_pos = playerSprite.get_pos()[0] - GameCam.get_course_rect().left
                     tile_progress = score_distance(player_pos, tile_progress)
                     # New updated HUD elements are returned to new_values
                     Hud.hud_update(playerSprite.get_hp(), playerSprite.get_max_hp(), get_money(), get_points(),
