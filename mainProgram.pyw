@@ -29,31 +29,19 @@ action_bind = ""
 bind_time = 5000
 
 
-
-
-
 '''Classes'''
 class Camera(object):
-
-
-
     def __init__(self, cam_dim, course_dim):
         self._camRect = pygame.Rect((0, 0), cam_dim)
         self._courseRect = pygame.Rect((0, 0), course_dim)
         self._vel = (0, 0)
 
-
-
     def set_scroll(self, player):
         self._vel = player.set_scroll(native_res)
         self.checkOnBoundary()
 
-
-
     def get_rect(self):
         return self._courseRect
-
-
 
     def apply(self, sprites, endRect):
         dx, dy = round(self._vel[0], 0), round(self._vel[1], 0)
@@ -63,8 +51,6 @@ class Camera(object):
             Sprite.scroll((dx, dy))
         endRect.x += dx
         endRect.y += dy
-
-
 
     # Prevents the screen to scroll past the course area
     def checkOnBoundary(self):
@@ -80,11 +66,7 @@ class Camera(object):
         self._vel = (dx, dy)
 
 
-
-
 class HUD(object):
-
-
     # Constructs the HUD for the first time
     def __init__(self, health, max_hp, money, score):
         # HUD background is rendered
@@ -100,8 +82,6 @@ class HUD(object):
         # The update function is called to render Text objects to show initial score and money
         # values and a list of Rects to represent the initial health
         self.hud_update(health, max_hp, money, score, [], 0, 0)
-
-
 
     # Update the values shown by the HUD
     def hud_update(self, hp, max_hp, money, score, effects, player_progress, wave_progress):
@@ -146,8 +126,6 @@ class HUD(object):
         # money and score arguments in string data type
         self.moneyValue = subFont.render(str(money), False, YELLOW)
         self.scoreValue = subFont.render(str(score), False, WHITE)
-
-
 
     # Draws the HUD objects on screen. Takes the window surface and the list of HUD elements
     def draw_hud(self, screen):
@@ -227,8 +205,6 @@ class HUD(object):
         screen.blit(self.progressLabel, (16, 150))
         # Draws the progress bar next to the label
         screen.blit(self.progressBar, (260, 150))
-
-
 
 
 ''' Procedures and Functions '''
@@ -426,15 +402,15 @@ if __name__ == "__main__":
     # Fonts for labels
     labelFont = pygame.font.Font("PressStart2P.ttf", 30)
     # Loads the hearts sprite sheet
-    HeartSheet = pygame.image.load("images\Hearts.png")
+    HeartSheet = pygame.image.load("images\\Hearts.png")
     # Loads the
-    EffectSheet = pygame.image.load("images\Effects.png")
+    EffectSheet = pygame.image.load("images\\Effects.png")
     # Loads and crops sprite images for items and obstacles
-    EntitySheet = pygame.image.load("images\ItemObstacles.png")
+    EntitySheet = pygame.image.load("images\\ItemObstacles.png")
     #
-    PlatformSheet = pygame.image.load("images\Platforms.png")
+    PlatformSheet = pygame.image.load("images\\Platforms.png")
     #
-    CoinSheet = pygame.image.load("images\Coin.png")
+    CoinSheet = pygame.image.load("images\\Coin.png")
 
     coin_frames = []
     for i in range(8):
@@ -553,11 +529,8 @@ if __name__ == "__main__":
 
     ''' Program Loop '''
     while not close:
-
-
         ''' Input Procedure '''
         update_input()
-
 
         ''' Update Procedure '''
         if pygame.K_LALT in inputs["key"] and pygame.K_F4 in inputs["key"] or inputs["close"]:

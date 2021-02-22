@@ -9,14 +9,9 @@ def update_controls(left, right, jump):
     left_key, right_key, jump_key = left, right, jump
 
 
-
-
 ''' Classes '''
 # Base class for all in game sprites, inherited from Sprite from Pygame
 class Entity(pygame.sprite.Sprite):
-
-
-
     # The class constructor. Takes the sprite name, position, dimensions and fill colour
     def __init__(self, name, x, y, width, height, color=None, image=None, frames=None, fps=1, current_frame=0):
         # Calls the superclass' constructor (i.e. Sprite class)
@@ -53,26 +48,18 @@ class Entity(pygame.sprite.Sprite):
         # The rect is positioned at the specified coordinates
         self.rect.x, self.rect.y = self._x, self._y
 
-
-
     # Method that returns the entity's name
     def get_name(self):
         return self._name
-
-
 
     # Sets the Entity's position
     def set_pos(self, x, y):
         self._x, self._y = x, y
         self.update_pos()
 
-
-
     # Returns Entity's current coords using the _x and _y attributes
     def get_pos(self):
         return self._x, self._y
-
-
 
     # Scrolls the entity by the specified scroll amount
     def scroll(self, vel):
@@ -82,20 +69,14 @@ class Entity(pygame.sprite.Sprite):
         self._y = self._y + dy
         self.update_pos()
 
-
-
     # Update the rect coords
     def update_pos(self):
         self.rect.x = self._x
         self.rect.y = self._y
 
-
-
     # Draws the entity. Used by entities except for entities in groups
     def draw(self):
         Frame.blit(self.image, self.rect)
-
-
 
     # Animates the entity by changing the current frame (Does not draw the frame)
     def animate(self):
@@ -104,38 +85,25 @@ class Entity(pygame.sprite.Sprite):
             self._current_frame = 0
         self.image = self._frames[int(self._current_frame)]
 
-
-
     # Returns the rendering mode (color/image/animate/black)
     def get_render_mode(self):
         return self._render_mode
-
-
 
     def kill(self):
         remove_name(self._name)
         super().kill()
 
 
-
-
 # Platform class for collidable platforms (Inherits Entity)
 class Platform(Entity):
-
-
-
     # Class constructor required name, position, dimensions and colour
     def __init__(self, name, x, y, width, height, color=None, image=None):
         # Calls the superclass' constructor (i.e. Entity)
         super().__init__(name, x, y, width, height, color=color, image=image)
 
-
-
     # Method for executing scripts upon collision with the Player
     def whenCollide(self):
         pass
-
-
 
     # Update method which overrides the one from the Sprite class. Takes one argument: the
     # list names of sprites that collided with the Player
@@ -145,14 +113,9 @@ class Platform(Entity):
             self.whenCollide()
 
 
-
-
 # Class for all pickable items in game. Items have points and a list of additional effects
 # that is applied to the player upon collision. Inherits the Entity class.
 class Item(Entity):
-
-
-
     # Class constructor
     def __init__(self, name, x, y, width, height, points, effects = (), color=None, image=None, frames=None, fps=1, current_frame=0):
         # Calls superclass' constructor
@@ -173,8 +136,6 @@ class Item(Entity):
             else:
                 self._effect_list.append(effects)
 
-
-
     # Method that applies all the item's effects onto the player sprite
     def apply_effect(self, playerSprite):
         if self._effect_list != ():
@@ -191,21 +152,15 @@ class Item(Entity):
         else:
             print("Warning: No effects in " + self.get_name())
 
-
-
     # Adds the points attribute to the score variable
     def add_points(self):
         add_points(self._points)
-
-
 
     # Method for when this sprite collides with the player
     def whenCollide(self, Player):
         # The item's effects are applied and the points are added to the score
         self.apply_effect(Player)
         self.add_points()
-
-
 
     # Updates sprite, which is called by the Collidables group
     def update(self, collide_list, player):
@@ -220,13 +175,8 @@ class Item(Entity):
             return None
 
 
-
-
 # Item which required more than adding an effect to the player
 class SpecialItem(Item):
-
-
-
     # Class constructor
     def __init__(self, name, x, y, width, height, points, life_time, effects = (), color=None, image=None, frames=None, fps=1, current_frame=0):
         super().__init__(name, x, y, width, height, points, effects, color, image, frames, fps, current_frame)
@@ -235,13 +185,9 @@ class SpecialItem(Item):
         if self._render_mode != "animate":
             self._base_image = self.image.copy()
 
-
-
     # Counts down the item's time until it is removed from the level
     def lifeCountdown(self):
         self._life_time -= Clock.get_time()
-
-
 
     # Draws the life timer bar over the image/frame
     def draw_timer(self):
@@ -249,13 +195,8 @@ class SpecialItem(Item):
         pygame.draw.rect(self.image, RED, (0, (self._h/2)-5, length, 10))
 
 
-
-
 # Special Item which allows the player to move past a certain distance of the level
 class ShipDock(SpecialItem):
-
-
-
     # Class constructor
     def __init__(self, name, x, y, width, height, points, wait_time, sail_time, speed, effects = (),
                  dock_color=None, dock_image=None, dock_frames=None, dock_fps=1, dock_current_frame=0,
@@ -277,27 +218,19 @@ class ShipDock(SpecialItem):
                                   ship_fps, ship_current_frame)
         self._ship_alive = True
 
-
-
     # Sets the ship on the bottom of the level
     def ship_on_water(self, sea_level):
         pos = list(self._shipEntity.get_pos())
         pos[1] = sea_level - self._shipEntity.rect.height
         self._shipEntity.set_pos(pos[0], pos[1])
 
-
-
     # Makes ship drawable by adding it into drawables group
     def ship_drawable(self, drawablesGroup):
         drawablesGroup.add(self._shipEntity, layer=1)
 
-
-
     # Counts down journey duration
     def sail_timer(self):
         self._sail_time -= Clock.get_time()
-
-
 
     # Moves the ship depending on its speed
     def move_ship(self):
@@ -305,8 +238,6 @@ class ShipDock(SpecialItem):
         dt = Clock.get_time()
         pos[0] = pos[0] + (self._speed * (dt/1000))
         self._shipEntity.set_pos(pos[0], pos[1])
-
-
 
     # Makes the ship sail off screen, where it will disappear
     def sail_away(self):
@@ -319,13 +250,9 @@ class ShipDock(SpecialItem):
             self._ship_alive = False
             return True
 
-
-
     # Called when dock life runs out
     def when_life_time_out(self):
         return self.sail_away()
-
-
 
     # Called when the player collides with the dock item
     def whenCollide(self, Player):
@@ -338,22 +265,16 @@ class ShipDock(SpecialItem):
         Player.set_pos(pos[0], pos[1])
         Player.board_ship(self)
 
-
-
     # Called while player is sailing on ship
     def while_sail(self, Player):
         pos = self._shipEntity.rect.center
         Player.set_pos(pos[0], pos[1])
-
-
 
     # Called when ship journey ends
     def when_sail_time_out(self, Player):
         self.jump_ship(Player)
         Player.trigger_invincibility(3000)
         return self.sail_away()
-
-
 
     # Forces player off ship
     def jump_ship(self, Player):
@@ -362,8 +283,6 @@ class ShipDock(SpecialItem):
         Player.disable_noclip()
         Player.disable_transparency()
         self._sail_time = 0
-
-
 
     # Update method
     def update(self, collide_list, player):
@@ -403,13 +322,8 @@ class ShipDock(SpecialItem):
         self.draw_timer()
 
 
-
-
 # Special Item which can shoot the player across the level
 class Cannon(SpecialItem):
-
-
-
     # Class constructor
     def __init__(self, name, x, y, width, height, points, life_time, speed, angle, effects = (), color=None, image=None, frames=None,
                  fps=1, current_frame=0):
@@ -418,16 +332,12 @@ class Cannon(SpecialItem):
         self._angle = (angle/360) * (2*math.pi)
         self._player_flying = False
 
-
-
     # Launches the player at a certain speed and angle
     def launch(self, player):
         vel_h = self._speed * math.cos(self._angle)
         vel_v = -self._speed * math.sin(self._angle)
         player.set_vel(vel_h, vel_v)
         self._player_flying = True
-
-
 
     # Called when player collides with cannon
     def whenCollide(self, Player):
@@ -437,14 +347,10 @@ class Cannon(SpecialItem):
         Player.high_speed_caps()
         self.launch(Player)
 
-
-
     # Called when player starts to fall (dy is positive)
     def when_player_falling(self, player):
         player.disable_noclip()
         player.trigger_invincibility(100)
-
-
 
     # Called when player lands on platform (dy = 0)
     def when_player_land(self, player):
@@ -452,8 +358,6 @@ class Cannon(SpecialItem):
         player.normal_speed_caps()
         player.trigger_invincibility(3000)
         self.kill()
-
-
 
     # Update method
     def update(self, collide_list, player):
@@ -477,13 +381,8 @@ class Cannon(SpecialItem):
         self.draw_timer()
 
 
-
-
 # Class for obstacle sprites.
 class Obstacle(Entity):
-
-
-
     # Class constructor
     def __init__(self, name, x, y, width, height, damage, lost_points, knockout_time, color=None, image=None, frames=None, fps=1, current_frame=0):
         super().__init__(name, x, y, width, height, color, image, frames, fps, current_frame)
@@ -494,33 +393,23 @@ class Obstacle(Entity):
         # The amount of time the player cannot move after collision.
         self._delay = knockout_time
 
-
-
     # Takes health from the player.
     def inflict(self, playerSprite):
         playerSprite.hurt(self._damage)
-
-
 
     # Takes points from the score.
     def take_points(self):
         add_points(-self._points)
 
-
-
     # Knockouts the player for the duration set by the _delay attribute
     def knockout(self, playerSprite):
         playerSprite.add_effect("knockout", None, self._delay)
-
-
 
     # Called upon collision.
     def whenCollide(self, player):
         self.inflict(player)
         self.knockout(player)
         self.take_points()
-
-
 
     # Updates sprite.
     def update(self, collide_list, player):
@@ -532,13 +421,8 @@ class Obstacle(Entity):
             return None
 
 
-
-
 # Class for the chasing wave enemy
 class Tsunami(Obstacle):
-
-
-
     # Class constructor
     def __init__(self, name, x, y, width, height, color, speed, delay, image=None, frames=None, fps=1, current_frame=0):
         super().__init__(name, x, y, width, height, 9999, 0, 0, color, image, frames, fps, current_frame)
@@ -547,22 +431,16 @@ class Tsunami(Obstacle):
         self._start_pos = (x, y)
         self._counting_delay = delay
 
-
-
     # Moves the wave to the right of the screen
     def move(self):
         self._x += self._speed
         self.update_pos()
-
-
 
     # Resets the tsunami to its starting state
     def reset(self):
         self._counting_delay = self._delay
         self._x, self._y = self._start_pos
         self.update_pos()
-
-
 
     # Updates the Tsunami object
     def update(self, collide_list, player):
@@ -574,13 +452,8 @@ class Tsunami(Obstacle):
             self.whenCollide(player)    # Calls whenCollide inherited from Obstacle (Deals 9999 dmg)
 
 
-
-
 # Character class for all character sprites, including the Player
 class Character(Entity):
-
-
-
     # Class constructor, with one extra argument: health
     def __init__(self, name, x, y, width, height, color, health, strength, armor):
         # Calls superclass' constructor
@@ -589,31 +462,21 @@ class Character(Entity):
         self._sp = strength         # Declares the strength attribute for attacking
         self._ap = armor            # Declares the armor attribute for defence
 
-
-
     # Method that returns the player's current health
     def get_hp(self):
         return self._health
 
-
     # Returns the Character's attack strength
     def get_sp(self):
         return self._sp
-
-
 
     # Returns the Character's defence
     def get_ap(self):
         return self._ap
 
 
-
-
 # Class for Enemy characters who can attack the player
 class Enemy(Character):
-
-
-
     # Class constructor
     def __init__(self, name, x, y, width, height, color, health, strength, armor, damage, win_points, lose_points):
         # Calls Character constructor
@@ -622,14 +485,10 @@ class Enemy(Character):
         self._win_p = win_points        # Points added when player wins
         self._lose_p = lose_points      # Points taken when player loses
 
-
-
     # Method when player wins fight
     def player_win(self):
         add_points(self._win_p)     # Points are added
         self.kill()                 # Kills the enemy sprite
-
-
 
     # Method when player loses fight. Takes playerSprite object
     def player_lose(self, player):
@@ -637,20 +496,13 @@ class Enemy(Character):
         player.hurt(self._damage)       # Player takes damage
         player.trigger_invincibility(2000)
 
-
-
     def update(self, collide_list, player):
         if self.get_name() in collide_list:
             player.set_opponent(self)
 
 
-
-
 ''' Player class for the player sprite. Only instanced in one variable '''
 class playerClass(Character):
-
-
-
     ''' Class constructor.  Takes all arguments from Character plus acceleration and a
         list of maximum speeds. '''
     def __init__(self, name, x, y, width, height, color, health, accel, max_speeds, strength, armor):
@@ -678,8 +530,6 @@ class playerClass(Character):
         self._transparent = False
         self._active_effects = []
         self._frame = self.image
-
-
 
     ''' Method that moves the player depending on the user's inputs.  Takes the inputs dict '''
     def user_move(self, inputs, Platforms):
@@ -775,51 +625,35 @@ class playerClass(Character):
             self._dx = 0
         self.update_pos()
 
-
-
     # Enables player's ability to move
     def enable_movement(self):
         self._can_move = True
-
-
 
     # Disables player's ability to move
     def disable_movement(self):
         self._can_move = False
 
-
-
     # Enables player's ability to noclip
     def enable_noclip(self):
         self._noclip = True
 
-
-
     # Disables player's ability to noclip
     def disable_noclip(self):
         self._noclip = False
-
-
 
     # Enables player invisibility
     def enable_transparency(self):
         self._transparent = True
         self.image.set_alpha(0)
 
-
-
     # Disables player invisibility
     def disable_transparency(self):
         self._transparent = False
         self.image.set_alpha(255)
 
-
-
     # Allows the player to move at high velocities (When the player is launched)
     def high_speed_caps(self):
         self._max_dx, self._min_dx, self._max_dy, self._min_dy = 99999, 99999, 99999, 99999
-
-
 
     # Resets the speed caps to normal
     def normal_speed_caps(self):
@@ -828,26 +662,18 @@ class playerClass(Character):
         self._max_dy = self._max_speeds[1][0]
         self._min_dy = self._max_speeds[1][1]
 
-
-
     # Returns a tuple of the player's position plus dimensions
     def get_dim(self):
         return self._x, self._y, self.rect.width, self.rect.height
-
-
 
     # Returns the velocity of the player in perpendicular components
     def get_vel(self):
         return self._dx, self._dy
 
-
-
     # Method that takes the new velocity and sets the player velocity to this new velocity
     def set_vel(self, new_dx, new_dy):
         self._dx = new_dx
         self._dy = new_dy
-
-
 
     # Method for checking collision between the player and other sprites in the collidables
     # group. Returns the names of sprites colliding with the player
@@ -860,8 +686,6 @@ class playerClass(Character):
                 obj_names.append(obj.get_name())
         return obj_names
 
-
-
     # Heals the player by the amount of hearts passed as the argument
     def heal(self, hearts):
         # This caps the player's health at the max_hp attribute
@@ -871,43 +695,29 @@ class playerClass(Character):
         elif self._health > 0:
             self._health += hearts
 
-
-
     # Return max hp
     def get_max_hp(self):
         return self._max_hp
-
-
 
     # Damages the player by the amount passed into the function
     def hurt(self, dmg):
         self._health -= dmg
 
-
-
     # Sets the current opponent
     def set_opponent(self, enemy):
         self._opponent = enemy
-
-
 
     # Returns the current opponent
     def get_opponent(self):
         return self._opponent
 
-
-
     # Adds the boarding ship to the ship attribute
     def board_ship(self, ship_dock):
         self._ship = ship_dock
 
-
-
     # Removes the ship from the ship attribute
     def jump_ship(self):
         self._ship.jump_ship(self)
-
-
 
     # Checks if the player is sailing on a ship
     def is_sailing(self):
@@ -915,8 +725,6 @@ class playerClass(Character):
             return True
         else:
             return False
-
-
 
     # Activates and adds an effect to the active effects list attribute. Takes the effect type,
     # effect amount/strength and the duration of the effect (In milliseconds). However, some
@@ -941,8 +749,6 @@ class playerClass(Character):
             self._min_dx += strength
             self._max_dx -= strength
             self._active_effects.append([effect_type, strength, duration])
-
-
 
     # Updates each active effect on the player by subtracting time from the duration property
     # of each effect, then reversing and removing expired effects
@@ -974,13 +780,9 @@ class playerClass(Character):
                     del self._active_effects[i]
                 i += 1
 
-
-
     # Returns the active effects list
     def get_effects(self):
         return self._active_effects
-
-
 
     # Flushes the active effects list
     def clear_effects(self):
@@ -988,13 +790,9 @@ class playerClass(Character):
             effect[2] = 0
         self.update_effect()
 
-
-
     # Returns the list of traits and their levels
     def get_trait_lvls(self):
         return self._trait_lvls
-
-
 
     # Upgrades a specified trait by a specified number of levels
     def upgrade_trait(self, trait, amount):
@@ -1015,8 +813,6 @@ class playerClass(Character):
                 print("Error: Trait" + trait + " not a valid trait")
             self._trait_lvls[trait] += 1
 
-
-
     # Sets the scroll amount depending on how far away the player is from the center of
     # the screen
     def set_scroll(self, resolution):
@@ -1025,27 +821,19 @@ class playerClass(Character):
         dy = self._y - center[1]
         return -dx, -dy
 
-
-
     # Starts the player's invincibility mode
     def trigger_invincibility(self, time):
         self._invincible = True             # Sets the invincible flag to true
         self._invincible_time = time        # Sets the duration of invincibility
-
-
 
     # Disables invincibility
     def disable_invincibility(self):
         self._invincible = False
         self._invincible_time = 0
 
-
-
     # Returns whether the player is invincible or not
     def get_invincibility(self):
         return self._invincible
-
-
 
     # Method to update the player sprite. Used by playerGroup. Returns the list of colliding
     # sprites with the player
@@ -1081,6 +869,3 @@ class playerClass(Character):
         if self._transparent:
             self.image.set_alpha(0)
         return collide_list
-
-
-

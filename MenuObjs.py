@@ -3,62 +3,40 @@ from Sprites import Entity
 p_speed = 5
 
 
-
-
 ''' Classes '''
 # Base class for interactive menu objects
 class guiObj(Entity):
-
-
-
     # Constructor for gui objects
     def __init__(self, name, x, y, width, height, color=None, image=None):
         super().__init__(name, x, y, width, height, color, image)
-
-
 
     # Called when selected by keyboard
     def when_select(self):
         pass
 
-
-
     # Called when not selected by keyboard
     def when_not_select(self):
         pass
-
-
 
     # Called when user moves pointer after pressing enter
     def when_deselect(self):
         pass
 
-
-
     # Called when Menu focuses on object
     def when_focus(self, inputs):
         pass
 
-
-
     # Called to handle mouse inputs
     def mouse_input(self, inputs):
         pass
-
-
 
     # Removes Entity scroll method by overriding
     def scroll(self, vel):
         pass
 
 
-
-
 # Class for images in Menus
 class Image(guiObj):
-
-
-
     # Class constructor
     def __init__(self, name, x, y, imageSurf, width=None, height=None):
         # If no dimensions are given, imageSurf's dimensions are used by default
@@ -71,13 +49,8 @@ class Image(guiObj):
         self.image = pygame.transform.scale(self.image, (self._w, self._h))
 
 
-
-
 # Class for clickable buttons in menus
 class Button(guiObj):
-
-
-
     # Class constructor
     def __init__(self, name, x, y, inactive_img, active_img, press_img):
         super().__init__(name, x, y, inactive_img.get_width(), inactive_img.get_height(), None, inactive_img)
@@ -88,8 +61,6 @@ class Button(guiObj):
         self._pressed = False               # Boolean determining if pressed
         self._trigger = False               # Boolean determining whether to trigger action
 
-
-
     # Returns if the button is triggered
     def get_trigger(self):
         if self._trigger:
@@ -98,19 +69,13 @@ class Button(guiObj):
         else:
             return False
 
-
-
     # Returns a Boolean determining whether the button is pressed
     def get_pressed(self):
         return self._pressed
 
-
-
     # Procedure when keyboard input selects this button
     def when_select(self):
         self._pressed = True
-
-
 
     # Procedure when keyboard inputs does not select this button
     def when_not_select(self):
@@ -119,13 +84,9 @@ class Button(guiObj):
             self._trigger = True    # Button is triggered
             self._pressed = False   # Button is unpressed
 
-
-
     # Procedure when inputs deselect this object
     def when_deselect(self):
         self._pressed = False       # Unpresses the button
-
-
 
     # Procedure that handles response to mouse inputs
     def mouse_input(self, inputs):
@@ -144,8 +105,6 @@ class Button(guiObj):
                     self.when_deselect()    # Otherwise, button is deselected
             self._pressed = False       # Pressed is set to false
 
-
-
     # Updates the button
     def update(self):
         if self._active:
@@ -156,13 +115,8 @@ class Button(guiObj):
             self.image = self._press_img # When pressed, image is set to pressed image
 
 
-
-
 # Class for Sliders
 class Slider(guiObj):
-
-
-
     # Class constructor
     def __init__(self, name, x, y, length, value_range, increment, pointerSurf, slideSurf, current_value=None, orientation="h"):
         self._len = length                  # The length of the slider (Longest side)
@@ -197,8 +151,6 @@ class Slider(guiObj):
         self._slideRect = self._slideSurf.get_rect(topleft=(self._x,self._y))               # Slider's rect
         self._pointerSurf = pointerSurf                                                     # Pointer's image
 
-
-
     # Moves the slider to a specific coordinate
     def move_to(self, x, y):
         self._x, self._y = x, y
@@ -215,8 +167,6 @@ class Slider(guiObj):
             self._ymax = self._y + self._h
         self._pointerRect = self._pointerSurf.get_rect(center=(centerx, centery))
 
-
-
     # Moves pointer up one increment
     def increase(self):
         if self._orientation == "h":
@@ -226,8 +176,6 @@ class Slider(guiObj):
             dy = (self._increment/self._range)*self._len
             self._pointerRect.move_ip(0, dy)                # Moves pointer down
 
-
-
     # Moves pointer down one increment
     def decrease(self):
         if self._orientation == "h":
@@ -236,8 +184,6 @@ class Slider(guiObj):
         elif self._orientation == "v":
             dy = -(self._increment / self._range) * self._len
             self._pointerRect.move_ip(0, dy)                # Moves pointer up
-
-
 
     # Set slider value
     def set_value(self, val):
@@ -254,25 +200,17 @@ class Slider(guiObj):
         else:
             print("Error: " + self._name + " slider - " + str(val) + " is out of range")
 
-
-
     # Returns current pointer value
     def get_value(self):
         return self._val
-
-
 
     # Returns slider's active state
     def get_active(self):
         return self._active
 
-
-
     # Called when selected by keyboard
     def when_select(self):
         self._active = True     # Makes slider draggable
-
-
 
     # Called when menu focuses on Slider object
     def when_focus(self, inputs):
@@ -291,8 +229,6 @@ class Slider(guiObj):
         if pygame.K_RETURN in inputs["key"]:
             self._active = False        # Slider deselected when user presses enter while being focused
 
-
-
     # Handles mouse inputs
     def mouse_input(self, inputs):
         if inputs["m button"] == "l" and self._slideRect.collidepoint(inputs["click pos"]) \
@@ -306,14 +242,10 @@ class Slider(guiObj):
             elif self._orientation == "v":
                 self._pointerRect.centery = inputs["m pos"][1]  # Pointer follows cursor's y pos when vertical
 
-
-
     # Slider is drawn onto the screen
     def draw(self):
         Frame.blit(self._slideSurf, (self._x, self._y))    # Draw the slider image
         Frame.blit(self._pointerSurf, self._pointerRect.topleft)   # Draw the pointer image
-
-
 
     # Updates the slider's value
     def update(self):
@@ -331,13 +263,8 @@ class Slider(guiObj):
             self._val = self._low+self._range*((self._pointerRect.centery-self._ymin)/self._len)    # Value updated
 
 
-
-
 # Toggleable buttons to turn on or off an option
 class TickBox(guiObj):
-
-
-
     # Class constructor
     def __init__(self, name, x, y, inactive_img, active_img, state=False):
         super().__init__(name, x, y, inactive_img.get_width(), inactive_img.get_height(), None, inactive_img)
@@ -347,8 +274,6 @@ class TickBox(guiObj):
         self._onSurf = pygame.transform.scale(active_img, (self._w, self._h))
         self._is_pressed = False
 
-
-
     # Toggles the tick box's state
     def toggle(self):
         if self._state == True:
@@ -356,19 +281,13 @@ class TickBox(guiObj):
         else:
             self._state = True      # Box turned on when previously off
 
-
-
     # Sets the tick box state
     def set_state(self, state):
         self._state = state
 
-
-
     # Returns TickBox's current state
     def get_state(self):
         return self._state
-
-
 
     # Handles when keyboard selected
     def when_select(self):
@@ -376,27 +295,19 @@ class TickBox(guiObj):
             self.toggle()   # Toggle's TickBox when selected
             self._is_pressed = True     # Tick box is pressed
 
-
-
     # Handled when not keyboard selected
     def when_not_select(self):
         self._is_pressed = False        # Tick box is not pressed
 
-
-
     # Handles when keyboard deselects this tick box
     def when_deselect(self):
         self._is_pressed = False        # Tick box is not pressed
-
-
 
     # Handles mouse inputs
     def mouse_input(self, inputs):
         # Toggles TickBox when clicked for 1 tick within the TickBox's rect area
         if inputs["m button"] == "l" and self.rect.collidepoint(inputs["click pos"]) and inputs["m hold tick"] == 1:
             self.toggle()
-
-
 
     # Updates TickBox's appearance
     def update(self):
@@ -406,13 +317,8 @@ class TickBox(guiObj):
             self.image = self._offSurf  # Off image used when state is off
 
 
-
-
 # Class for drop down menus
 class DropMenu(guiObj):
-
-
-
     # Class constructor. Font
     def __init__(self, name, x, y, Font, option_list, lineSurf, scrollPointerSurf, scrollSlideSurf, text_color=(0,0,0),
                  current_index=0, lines=3):
@@ -464,25 +370,17 @@ class DropMenu(guiObj):
         self._Scrollbar = Slider(self._name+" scroll", scroll_x, scroll_y, scroll_h, (low, high), 1, scrollPointerSurf,
                                  scrollSlideSurf, self._list_index, "v")
 
-
-
     # Returns the state of the dropped list
     def get_dropped(self):
         return self._dropped
-
-
 
     # Sets the list to drop
     def drop_down(self):
         self._dropped = True
 
-
-
     # Sets the list to pull up
     def drop_up(self):
         self._dropped = False
-
-
 
     # Scrolls the drop list up
     def scroll_up(self):
@@ -492,8 +390,6 @@ class DropMenu(guiObj):
         # Updates the drop list
         self._drop_list = self._options[self._list_index:self._list_index+self._list_size]
 
-
-
     # Scrolls the drop list down
     def scroll_down(self):
         self._Scrollbar.increase()      # Moves the scrollbar pointer up
@@ -502,13 +398,9 @@ class DropMenu(guiObj):
         # Updates drop list
         self._drop_list = self._options[self._list_index:self._list_index + self._list_size]
 
-
-
     # Sets the pointer to the passed line number
     def select_line(self, line):
         self._pointed_line = line
-
-
 
     # Set current option
     def set_option(self, option):
@@ -517,13 +409,9 @@ class DropMenu(guiObj):
         else:
             print("Error: " + self._name + " - " + option + " not in option list")
 
-
-
     # Returns the currently selected option
     def get_option(self):
         return self._current
-
-
 
     # Draws the drop menu
     def draw(self):
@@ -538,13 +426,9 @@ class DropMenu(guiObj):
                 Frame.blit(Label, self._rects_list[i].topleft)
             self._Scrollbar.draw()
 
-
-
     # Procedure when selected by keyboard
     def when_select(self):
         self.drop_down()
-
-
 
     # Procedure when focused by keyboard
     def when_focus(self, inputs):
@@ -564,8 +448,6 @@ class DropMenu(guiObj):
             elif pygame.K_RETURN in inputs["key"] and inputs["k hold tick"] == 1:
                 self._current = self._drop_list[self._pointed_line]
                 self.drop_up()
-
-
 
     # Handles mouse inputs
     def mouse_input(self, inputs):
@@ -600,14 +482,9 @@ class DropMenu(guiObj):
                             self._dropped = False
 
 
-
-
 # Class for Menu screens
 class Menu(object):
-
-
-
-    # CLass constructor requires name (string), objects (list), gui_map (2D array)
+    # Class constructor requires name (string), objects (list), gui_map (2D array)
     def __init__(self, name, objects, gui_map, bkgSurf=None, pointerSurf=None):
         self._name = check_name(name)       # Name to identify this Menu
         self._objs = objects                # List of objects on the Menu
@@ -627,8 +504,6 @@ class Menu(object):
             self._pointSurf.fill((0,0,0))
         else:
             self._pointSurf = pointerSurf   # If given, pointer image is set as attribute
-
-
 
     # Validates gui maps for empty or incorrect entries
     def validate_map(self, map):
@@ -653,13 +528,9 @@ class Menu(object):
                             print("Warning: " + self._name + " menu's node " + node + "'s " + field +
                                   " value is not a name of one of the available objects")
 
-
-
     # Returns Menu's name
     def get_name(self):
         return self._name
-
-
 
     # Finds the object with the passed name
     def find_obj(self, name):
@@ -673,8 +544,6 @@ class Menu(object):
             return obj  # Returns object if found
         else:
             return False    # Otherwise, False is returned
-
-
 
     # Handles keyboard inputs
     def key_input(self, inputs):
@@ -716,8 +585,6 @@ class Menu(object):
             elif pygame.K_RETURN not in inputs["key"]:
                 obj.when_not_select()    # Object's procedure that deals when key is let go
 
-
-
     # Procedure for handling mouse inputs
     def mouse_input(self, inputs):
         # If an object is being focused (Only Drop Menus can be focused here)
@@ -744,8 +611,6 @@ class Menu(object):
                         if obj.get_dropped():
                             self._focus = obj
 
-
-
     # Procedure that updates the Menu
     def update(self, inputs):
         if inputs["key"] != []:
@@ -762,8 +627,6 @@ class Menu(object):
             if type(obj).__name__ in ("Button", "Slider", "TickBox", "DropMenu"):
                 obj.update()        # Updates each GUI object
 
-
-
     # Procedure that draws all objects in this Menu
     def draw(self):
         # Object being pointed by the keyboard
@@ -776,6 +639,4 @@ class Menu(object):
                 pos = (obj.get_pos()[0] - 50, obj.get_pos()[1])
                 Frame.blit(self._pointSurf, pos)
             obj.draw()      # Draws all objects by calling their draw method
-
-
 

@@ -43,7 +43,6 @@ def update_input():
     if inputs["key"] != []:
         inputs["k hold tick"] += 1                      # Increments key hold tick when a key is being pressed
 
-
 # Function that checks availability of an object name
 def check_name(name):
     done = False        # Flag indicating if a unique name is found
@@ -59,12 +58,10 @@ def check_name(name):
             print("Warning: Obj name " + name + " changed to " + new_name)
     return new_name                     # Returns the name found
 
-
 # Removes passed name from obj_names
 def remove_name(name):
     if name in obj_names:
         obj_names.remove(name)
-
 
 # Function that adds points based on distance covered
 def score_distance(player_pos, progress):
@@ -76,30 +73,25 @@ def score_distance(player_pos, progress):
         progress += dx                          # Adds change in tile distance to progress
     return progress                             # Returns progress
 
-
 # Function to add to score within local scopes
 def add_points(points):
     global score
     score += points
-
 
 # Function to add to money within local scopes
 def add_money(amount):
     global money
     money += amount
 
-
 # Function to return the current score
 def get_points():
     global score
     return score
 
-
 # Function to return the current amount of money
 def get_money():
     global money
     return money
-
 
 # Reset money and score
 def reset_money_score():
@@ -108,7 +100,6 @@ def reset_money_score():
     money = 0
     score = 0
 
-
 def set_screen_settings(xf, yf, o):
     global xpos_f
     global ypos_f
@@ -116,7 +107,6 @@ def set_screen_settings(xf, yf, o):
     xpos_f = xf
     ypos_f = yf
     origin = o
-
 
 def find_res(resolution):
     if round(resolution[1] * (4/3)) <= resolution[0]:
