@@ -45,7 +45,16 @@ class Camera(object):
     # player - The player sprite
     def set_scroll(self, player):
         self._vel = player.set_scroll(native_res)
-        self._checkOnBoundary()
+        dx, dy = self._vel
+        if self._courseRect.left + dx >= self._camRect.left:
+            dx = self._camRect.left - self._courseRect.left
+        elif self._courseRect.right + dx <= self._camRect.right:
+            dx = self._camRect.right - self._courseRect.right
+        if self._courseRect.top + dy >= self._camRect.top:
+            dy = self._camRect.top - self._courseRect.top
+        elif self._courseRect.bottom + dy <= self._camRect.bottom:
+            dy = self._camRect.bottom - self._courseRect.bottom
+        self._vel = (dx, dy)
 
     # Return Rect containing course
     def get_course_rect(self):
@@ -63,19 +72,6 @@ class Camera(object):
             Sprite.scroll((dx, dy))
         endRect.x += dx
         endRect.y += dy
-
-    # Adjusts scrolling amount to prevent the screen to scroll past the course area
-    def _checkOnBoundary(self):
-        dx, dy = self._vel
-        if self._courseRect.left + dx >= self._camRect.left:
-            dx = self._camRect.left - self._courseRect.left
-        elif self._courseRect.right + dx <= self._camRect.right:
-            dx = self._camRect.right - self._courseRect.right
-        if self._courseRect.top + dy >= self._camRect.top:
-            dy = self._camRect.top - self._courseRect.top
-        elif self._courseRect.bottom + dy <= self._camRect.bottom:
-            dy = self._camRect.bottom - self._courseRect.bottom
-        self._vel = (dx, dy)
 
 
 class HUD(object):
