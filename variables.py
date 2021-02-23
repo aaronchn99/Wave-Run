@@ -1,7 +1,20 @@
 import pygame
 import json
 import math
+import enum
 pygame.init()
+
+
+''' Enums '''
+class Effect(enum.Enum):
+    HEALTH=1
+    MONEY=2
+    FAST=3
+    SLOW=4
+    KNOCKOUT=5
+    DIZZY=6
+    CANNON=7
+    SHIP=8
 
 
 ''''Functions'''
@@ -157,7 +170,7 @@ ypos_f = 1.0
 # Gameplay variables
 money = 0
 score = 0
-health = 2
+health = 5
 # Configs
 with open("configs\\upgrades.cfg", "r") as config:
     upgrades = json.load(config)

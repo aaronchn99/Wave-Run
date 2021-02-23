@@ -141,10 +141,10 @@ class Item(Entity):
         if self._effect_list != ():
             for effect in self._effect_list:
                 # Money effects add to the money variable
-                if effect[0] == "money":
+                if effect[0] == Effect.MONEY:
                     add_money(effect[1])
                 # Health effects heal the player
-                elif effect[0] == "health":
+                elif effect[0] == Effect.HEALTH:
                     playerSprite.heal(effect[1])
                 # Other effects use the Player's add_effect() method
                 else:
@@ -403,7 +403,7 @@ class Obstacle(Entity):
 
     # Knockouts the player for the duration set by the _delay attribute
     def knockout(self, playerSprite):
-        playerSprite.add_effect("knockout", None, self._delay)
+        playerSprite.add_effect(Effect.KNOCKOUT, None, self._delay)
 
     # Called upon collision.
     def whenCollide(self, player):
@@ -729,29 +729,31 @@ class playerClass(Character):
     # Activates and adds an effect to the active effects list attribute. Takes the effect type,
     # effect amount/strength and the duration of the effect (In milliseconds). However, some
     # effects do not use all the arguments so unused arguments are passed as None.
+    # TODO: Change effect names to enum symbols
     def add_effect(self, effect_type, strength, duration):
-        # Applies the knockout effect if effect_type is "knockout"
-        if effect_type == "knockout":
+        # Applies the knockout effect
+        if effect_type == Effect.KNOCKOUT:
             # The player stops moving and the effect is added to the list
             self._accel = 0
             self._min_dy = 0
             self._dx = 0
             self._dy = 0
             self._active_effects.append([effect_type, strength, duration])
-        # Increases the player's max speeds if the effect_type is "fast"
-        elif effect_type == "fast":
+        # Increases the player's max speeds
+        elif effect_type == Effect.FAST:
             # The maximum speeds are increased by the strength value and the effect is added
             self._min_dx -= strength
             self._max_dx += strength
             self._active_effects.append([effect_type, strength, duration])
-        # Reduces max speeds if the effect_type is "slow"
-        elif effect_type == "slow":
+        # Reduces max speeds
+        elif effect_type == Effect.SLOW:
             self._min_dx += strength
             self._max_dx -= strength
             self._active_effects.append([effect_type, strength, duration])
 
     # Updates each active effect on the player by subtracting time from the duration property
     # of each effect, then reversing and removing expired effects
+    # TODO: Change effect names to enum symbols
     def update_effect(self):
         # Gets the time passed since last tick
         dt = Clock.get_time()
@@ -765,15 +767,15 @@ class playerClass(Character):
                 # If the selected effect has expired
                 if self._active_effects[i][2] <= 0:
                     # If the effect is a knockout effect
-                    if self._active_effects[i][0] == "knockout":
+                    if self._active_effects[i][0] == Effect.KNOCKOUT:
                         # Sets the player acceleration and max upward speed to normal
                         self._accel = self._start_values[0]
                         self._min_dy = self._start_values[1]
-                    elif self._active_effects[i][0] == "fast":
+                    elif self._active_effects[i][0] == Effect.FAST:
                         # Decreases maximum speeds by the strength property value
                         self._max_dx -= self._active_effects[i][1]
                         self._min_dx += self._active_effects[i][1]
-                    elif self._active_effects[i][0] == "slow":
+                    elif self._active_effects[i][0] == Effect.SLOW:
                         self._max_dx += self._active_effects[i][1]
                         self._min_dx -= self._active_effects[i][1]
                     # Removes effect from the list

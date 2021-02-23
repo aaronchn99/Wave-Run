@@ -75,10 +75,20 @@ class Camera(object):
 
 
 class HUD(object):
+    # HUD Constants
+    HUD_POS = (0, 0)
+    HP_POS = (78, 16)
+    HEART_DIM = (70, 65)
+    GOLD_POS = (660, 16)
+    SCORE_POS = (660, 60)
+    EFFECT_POS = (360, 16)
+    EFFECT_SPRITE_DIM = (65, 65)
+    PROGRESS_POS = (16, 150)
+
     # Constructs the HUD for the first time
     # Params: (See hud_update)
     def __init__(self, health, max_hp, money, score):
-        # HUD background is rendered
+        # HUD background is rendered (TODO: Replace with custom background)
         self.background = pygame.Surface((native_res[0], 208))
         self.background.fill(BLACK)
         # Using the font loaded in the loading procedure, Text objects are set up and rendered
@@ -88,9 +98,27 @@ class HUD(object):
         self.scoreLabel = subFont.render("Score", False, WHITE)
         self.effectLabel = subFont.render("Effects", False, WHITE)
         self.progressLabel = subFont.render("Course", False, WHITE)
+        # Heart sprite list
+        # 0: Empty Half heart, 1: Full Half, 2: Empty Whole, 3: Half Whole, 4: Full Whole
+        self.HeartSprites = [
+            crop(HeartSheet, (0, 0), self.HEART_DIM),
+            crop(HeartSheet, (self.HEART_DIM[0], 0), self.HEART_DIM),
+            crop(HeartSheet, (self.HEART_DIM[0]*2, 0), self.HEART_DIM),
+            crop(HeartSheet, (self.HEART_DIM[0]*3, 0), self.HEART_DIM),
+            crop(HeartSheet, (self.HEART_DIM[0]*4, 0), self.HEART_DIM),
+        ]
+        # Effects sprite dictionary
+        self.EffectSprites = {
+            Effect.FAST: crop(EffectSheet, (0, 0), self.EFFECT_SPRITE_DIM),
+            Effect.SLOW: crop(EffectSheet, (self.EFFECT_SPRITE_DIM[0], 0), self.EFFECT_SPRITE_DIM),
+            Effect.KNOCKOUT: crop(EffectSheet, (self.EFFECT_SPRITE_DIM[0]*2, 0), self.EFFECT_SPRITE_DIM),
+            Effect.DIZZY: crop(EffectSheet, (self.EFFECT_SPRITE_DIM[0]*3, 0), self.EFFECT_SPRITE_DIM),
+            Effect.CANNON: crop(EffectSheet, (self.EFFECT_SPRITE_DIM[0]*4, 0), self.EFFECT_SPRITE_DIM),
+            Effect.SHIP: crop(EffectSheet, (self.EFFECT_SPRITE_DIM[0]*5, 0), self.EFFECT_SPRITE_DIM),
+        }
         # The update function is called to render Text objects to show initial score and money
         # values and a list of Rects to represent the initial health
-        self.hud_update(health, max_hp, money, score, [], 0, 0)
+        self.hud_update(health, max_hp, money, score)
 
     # Update the values shown by the HUD
     # Params:
@@ -101,30 +129,14 @@ class HUD(object):
     # effects - List of effects currently applied to player
     # player_progress - Player's position (as proportion of course)
     # wave_progress - Wave's position (as proportion of wave)
-    def hud_update(self, hp, max_hp, money, score, effects, player_progress, wave_progress):
+    def hud_update(self, hp, max_hp, money, score, effects=[], player_progress=0, wave_progress=0):
         # Sets up the list of hearts
         # It is only set up if the health is larger than 0
-        hearts = []
+        self.Hearts = []
         if hp > 0:
-            current_hp = hp
-            while max_hp > 0:
-                if current_hp >= 2:
-                    hearts.append(1)
-                    current_hp -= 2
-                elif current_hp == 1:
-                    if current_hp == max_hp:
-                        hearts.append(3)
-                        current_hp -= 1
-                    else:
-                        hearts.append(2)
-                        current_hp -= 1
-                elif current_hp == 0:
-                    if max_hp == 1:
-                        hearts.append(4)
-                    elif max_hp >= 2:
-                        hearts.append(5)
-                max_hp -= 2
-        self.Hearts = hearts
+            self.Hearts = [4 for i in range(hp//2)] + [2 for i in range(max_hp//2-hp//2)] + [0 for i in range(max_hp % 2)]
+            if hp%2 == 1 :
+                self.Hearts[hp//2] += 1
         # Creates a list of active effect types for the draw procedure to use
         effectList = list()
         for effect in effects:
@@ -135,7 +147,9 @@ class HUD(object):
         self.progressBar.fill(WHITE, pygame.Rect((0, 0, 14, 42)))
         self.progressBar.fill(WHITE, pygame.Rect((726, 0, 14, 42)))
         self.progressBar.fill(WHITE, pygame.Rect((0, 18, 740, 6)))
+        # TODO: Replace red rectangle with player sprite
         self.progressBar.fill(RED, pygame.Rect((round(740 * player_progress - 14), 0, 28, 42)))
+        # TODO: Replace wavePointer with custom wave sprite
         wavePointer = pygame.Surface((42, 42))
         wavePointer.fill(BLUE)
         self.progressBar.blit(wavePointer, (round((740 * wave_progress) - 42), 0))
@@ -147,81 +161,50 @@ class HUD(object):
     # Draws the HUD objects on screen. Takes the window surface and the list of HUD elements
     def draw_hud(self, screen):
         # The image of the HUD background is drawn on the window
-        screen.blit(self.background, (0, 0))
+        screen.blit(self.background, self.HUD_POS)
         # The Hearts label is drawn
-        screen.blit(self.hpLabel, (78, 16))
+        screen.blit(self.hpLabel, self.HP_POS)
         # The list of hearts to be drawn is put together as one Surface object and centre-aligned
         # with the "Hearts" label.
         if self.Hearts != []:
-            Heart1 = crop(HeartSheet, (0, 0), (70, 65))
-            Heart2 = crop(HeartSheet, (70, 0), (70, 65))
-            Heart3 = crop(HeartSheet, (140, 0), (70, 65))
-            Heart4 = crop(HeartSheet, (210, 0), (70, 65))
-            Heart5 = crop(HeartSheet, (280, 0), (70, 65))
-            arrange = self.Hearts
-            heartRect = pygame.Rect((0, 0), (70, 65))
-            for i in range(1, len(arrange)):
-                heartRect = heartRect.union(pygame.Rect((73 * i, 0), (70, 65)))
-            heart_x = self.hpLabel.get_rect(topleft=(78, 16)).midbottom[0]
-            heart_y = self.hpLabel.get_rect(topleft=(78, 16)).midbottom[1] + 8
-            heartRect.midtop = (heart_x, heart_y)
-            Hearts = pygame.Surface((heartRect.width, heartRect.height))
-            for i in range(len(arrange)):
-                if arrange[i] == 1:
-                    Hearts.blit(Heart1, (73 * i, 0))
-                elif arrange[i] == 2:
-                    Hearts.blit(Heart2, (73 * i, 0))
-                elif arrange[i] == 3:
-                    Hearts.blit(Heart3, (73 * i, 0))
-                elif arrange[i] == 4:
-                    Hearts.blit(Heart4, (73 * i, 0))
-                elif arrange[i] == 5:
-                    Hearts.blit(Heart5, (73 * i, 0))
+            heartRect = pygame.Rect(0, 0, (self.HEART_DIM[0]+3)*len(self.Hearts)-3, self.HEART_DIM[1])
+            heartRect.midtop = self.hpLabel.get_rect(topleft=self.HP_POS).midbottom
+            heartRect.y += 8
+            Hearts = pygame.Surface(heartRect.size)
+            for i in range(len(self.Hearts)):
+                Hearts.blit(self.HeartSprites[self.Hearts[i]], ((self.HEART_DIM[0]+3) * i, 0))
             screen.blit(Hearts, heartRect.topleft)
         # The "Gold" label is drawn
-        screen.blit(self.moneyLabel, (660, 16))
+        screen.blit(self.moneyLabel, self.GOLD_POS)
         # The Text that shows the money amount is drawn next to the Gold label
-        pos = list(self.moneyLabel.get_rect(topleft=(660, 16)).topright)
-        pos[0] = pos[0] + 20
+        pos = list(self.moneyLabel.get_rect(topleft=self.GOLD_POS).topright)
+        pos[0] += 20
         screen.blit(self.moneyValue, pos)
         # The "Score" label is drawn
-        screen.blit(self.scoreLabel, (660, 60))
+        screen.blit(self.scoreLabel, self.SCORE_POS)
         # Similar to the money amount text, the score value text is drawn next to the Score label
-        pos = list(self.scoreLabel.get_rect(topleft=(660, 60)).topright)
-        pos[0] = pos[0] + 20
+        pos = list(self.scoreLabel.get_rect(topleft=self.SCORE_POS).topright)
+        pos[0] += 20
         screen.blit(self.scoreValue, pos)
         # Draws the Effects label
-        screen.blit(self.effectLabel, (360, 16))
+        screen.blit(self.effectLabel, self.EFFECT_POS)
         # The list of effect sprites to be drawn is put together as one Surface object and centre-aligned
         # with the Effects label.
         effect_list = self.effect_list
         if effect_list != []:
-            fastSprite = crop(EffectSheet, (0, 0), (65, 65))
-            slowSprite = crop(EffectSheet, (65, 0), (65, 65))
-            koSprite = crop(EffectSheet, (130, 0), (65, 65))
-            confuseSprite = crop(EffectSheet, (195, 0), (65, 65))
-            cannonSprite = crop(EffectSheet, (260, 0), (65, 65))
-            shipSprite = crop(EffectSheet, (325, 0), (65, 65))
-            spriteRect = fastSprite.get_rect()
-            for i in range(1, len(effect_list)):
-                spriteRect = spriteRect.union(fastSprite.get_rect(topleft=(70 * i, 0)))
-            x = self.effectLabel.get_rect(topleft=(360, 16)).midbottom[0]
-            y = self.effectLabel.get_rect(topleft=(360, 16)).midbottom[1] + 8
-            spriteRect.midtop = (x, y)
+            spriteRect = pygame.Rect(0, 0, (self.EFFECT_SPRITE_DIM[0]+5)*len(effect_list)-5, self.EFFECT_SPRITE_DIM[1])
+            spriteRect.midtop = self.effectLabel.get_rect(topleft=self.EFFECT_POS).midbottom
+            spriteRect.y += 8
             effectSurf = pygame.Surface(spriteRect.size)
-            #effectSurf.fill(WHITE)
             for i in range(len(effect_list)):
-                if effect_list[i] == "fast":
-                    effectSurf.blit(fastSprite, (70 * i, 0))
-                elif effect_list[i] == "slow":
-                    effectSurf.blit(slowSprite, (70 * i, 0))
-                elif effect_list[i] == "knockout":
-                    effectSurf.blit(koSprite, (70 * i, 0))
+                effectSurf.blit(self.EffectSprites[effect_list[i]], ((self.EFFECT_SPRITE_DIM[0]+5) * i, 0))
             screen.blit(effectSurf, spriteRect.topleft)
         # Draws the progress label
-        screen.blit(self.progressLabel, (16, 150))
+        screen.blit(self.progressLabel, self.PROGRESS_POS)
         # Draws the progress bar next to the label
-        screen.blit(self.progressBar, (260, 150))
+        pos = list(self.progressLabel.get_rect(topleft=self.PROGRESS_POS).topright)
+        pos[0] += 20
+        screen.blit(self.progressBar, pos)
 
 
 ''' Procedures and Functions '''
@@ -315,33 +298,33 @@ def buildLevel(map, metadata, tile_dim, Groups):
                     Group.add(platform)
                 Drawables.add(platform, layer=2)
             elif tile == "C":
-                coin = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], rand.randint(5, 20), ["money", 1, 0],
+                coin = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], rand.randint(5, 20), [Effect.MONEY, 1, 0],
                             frames=coin_frames, fps=8)
                 Collidables.add(coin)
                 Drawables.add(coin, layer=3)
             elif tile == "T":
                 chest = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], rand.randint(25, 50),
-                             ["money", 20, 0], image=crop(EntitySheet, (40, 0), (40, 40)))
+                             [Effect.MONEY, 20, 0], image=crop(EntitySheet, (40, 0), (40, 40)))
                 Collidables.add(chest)
                 Drawables.add(chest, layer=3)
             elif tile == "B":
-                bandage = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 0, ["health", 1, 0],
+                bandage = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 0, [Effect.HEALTH, 1, 0],
                                image=crop(EntitySheet, (80, 0), (40, 40)))
                 Collidables.add(bandage)
                 Drawables.add(bandage, layer=3)
             elif tile == "M":
-                medkit = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 0, ["health", 999, 0],
+                medkit = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 0, [Effect.HEALTH, 999, 0],
                               image=crop(EntitySheet, (0, 40), (40, 40)))
                 Collidables.add(medkit)
                 Drawables.add(medkit, layer=3)
             elif tile == "R":
                 rum = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], rand.randint(50, 100),
-                           [["health", 2, 0], ["slow", 150, 10000]], image=crop(EntitySheet, (40, 40), (40, 40)))
+                           [[Effect.HEALTH, 2, 0], [Effect.SLOW, 150, 10000]], image=crop(EntitySheet, (40, 40), (40, 40)))
                 Collidables.add(rum)
                 Drawables.add(rum, layer=3)
             elif tile == "H":
                 horse = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], rand.randint(100, 200),
-                             ["fast", 240, 15000], image=crop(EntitySheet, (80, 40), (40, 40)))
+                             [Effect.FAST, 240, 15000], image=crop(EntitySheet, (80, 40), (40, 40)))
                 Collidables.add(horse)
                 Drawables.add(horse, layer=3)
             elif tile == "A":
