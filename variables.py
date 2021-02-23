@@ -6,6 +6,7 @@ pygame.init()
 
 
 ''' Enums '''
+# Player effect types
 class Effect(enum.Enum):
     HEALTH=1
     MONEY=2
@@ -15,6 +16,17 @@ class Effect(enum.Enum):
     DIZZY=6
     CANNON=7
     SHIP=8
+
+
+# Game Screen modes
+class ScreenMode(enum.Enum):
+    MAIN=1
+    PLAY=2
+    SETTINGS=3
+    PASS=4
+    SHOP=5
+    LOSE=6
+    WIN=7
 
 
 ''''Functions'''

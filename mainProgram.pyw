@@ -19,7 +19,7 @@ pygame.display.set_mode(resolution)
 pygame.display.set_mode(resolution, pygame.FULLSCREEN)
 # Game program variables
 close = False
-mode = "main"           # Controls what screen to show
+mode = ScreenMode.MAIN           # Controls what screen to show
 loaded = False          # If level has loaded
 game_init = False       # If game environment has initialised (Player, HUD, Rects, Pause menu)
 shop_init = False       # If shop menu has initialised
@@ -543,20 +543,20 @@ if __name__ == "__main__":
             inputs["key"].remove(pygame.K_1)
 
         # Main Menu screen
-        if mode == "main":
+        if mode == ScreenMode.MAIN:
             Main.update(inputs)     # Update the Menu
             tell = False
             if Main.find_obj("start") != False:
                 button = Main.find_obj("start")
                 if button.get_trigger():
-                    mode = "play"       # If the Start New button was triggered, mode is set to "play"
+                    mode = ScreenMode.PLAY       # If the Start New button was triggered, mode is set to "play"
                     game_init = False
                     loaded = False
                     level = 1
             if Main.find_obj("setting") != False:
                 button = Main.find_obj("setting")
                 if button.get_trigger():
-                    mode = "settings"
+                    mode = ScreenMode.SETTINGS
             if Main.find_obj("quit") != False:
                 button = Main.find_obj("quit")
                 if button.get_trigger():
@@ -571,7 +571,7 @@ if __name__ == "__main__":
                 Frame.blit(unavailableText, (0, 738))
 
         # Settings menu
-        elif mode == "settings":
+        elif mode == ScreenMode.SETTINGS:
             # Menu updated if not waiting for key binding
             if action_bind == "":
                 Settings.update(inputs)
@@ -658,7 +658,7 @@ if __name__ == "__main__":
                 Settings.find_obj("music slider").set_value(settings_dict["music vol"])
                 Settings.find_obj("sfx slider").set_value(settings_dict["sfx vol"])
                 Settings.find_obj("difficulty list").set_option(settings_dict["difficulty"])
-                mode = "main"
+                mode = ScreenMode.MAIN
             # Drawing code
             Settings.draw()
             if action_bind == "left":
@@ -695,7 +695,7 @@ if __name__ == "__main__":
             #Frame.blit(note, (10, native_res[1] - note.get_height()))
 
         # Gameplay mode
-        elif mode == "play":
+        elif mode == ScreenMode.PLAY:
             # Initialises game
             if not game_init:
                 playerSprite = playerClass("player", 0, 0, 32, 48, RED, health, player_accel,
@@ -815,13 +815,13 @@ if __name__ == "__main__":
                         inputs["key"].remove(pygame.K_ESCAPE)
 
             if playerSprite.get_hp() <= 0:
-                mode = "lose"
+                mode = ScreenMode.LOSE
             elif playerSprite.rect.colliderect(EndArea):
                 playerSprite.disable_invincibility()
                 if playerSprite.is_sailing():
                     playerSprite.jump_ship()
                 inputs["key"] = []
-                mode = "pass"
+                mode = ScreenMode.PASS
 
             ''' Output Procedure '''
             # First, the window is filled white
@@ -842,7 +842,7 @@ if __name__ == "__main__":
                 pauseButton.draw()
 
         # Upgrade shop
-        elif mode == "shop":
+        elif mode == ScreenMode.SHOP:
             # Update code
             # Fetches data for shop if not already done so
             if not shop_init:
@@ -889,7 +889,7 @@ if __name__ == "__main__":
                     if dlvl > 0:
                         playerSprite.upgrade_trait(trait, dlvl)
                 destroyLevel((Drawables, Collidables, Platforms))
-                mode = "play"                   # Transistions back to the game
+                mode = ScreenMode.PLAY                   # Transistions back to the game
                 shop_init = False               # De-initialises shop menu
             # Drawing code
             Shop.draw()
@@ -918,34 +918,34 @@ if __name__ == "__main__":
             Frame.blit(moneyLeftTxt, pos)
 
         # The game over procedure is called when the player's health is zero or lower
-        elif mode == "lose":
+        elif mode == ScreenMode.LOSE:
             destroyLevel((Drawables, playerGroup, Collidables, Platforms))
             option = game_over()
             if option == "main":
-                mode = "main"
+                mode = ScreenMode.MAIN
             elif option == "retry":
-                mode = "play"
+                mode = ScreenMode.PLAY
                 game_init = False
                 loaded = False
                 level = 1
 
         # Handles when the player has cleared a level
-        elif mode == "pass":
+        elif mode == ScreenMode.PASS:
             cont = lvl_clear(inputs)
             if cont:
                 level += 1
                 if level > len(os.listdir("levels")):
-                    mode = "win"
+                    mode = ScreenMode.WIN
                 else:
-                    mode = "shop"
+                    mode = ScreenMode.SHOP
                     loaded = False
 
         # Handles when the player has won the game
-        elif mode == "win":
+        elif mode == ScreenMode.WIN:
             destroyLevel((Drawables, playerGroup, Collidables, Platforms))
             game_win()
             if pygame.K_RETURN in inputs["key"]:
-                mode = "main"
+                mode = ScreenMode.MAIN
                 inputs["key"].remove(pygame.K_RETURN)
 
         # Shows fps

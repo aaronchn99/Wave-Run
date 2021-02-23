@@ -729,7 +729,6 @@ class playerClass(Character):
     # Activates and adds an effect to the active effects list attribute. Takes the effect type,
     # effect amount/strength and the duration of the effect (In milliseconds). However, some
     # effects do not use all the arguments so unused arguments are passed as None.
-    # TODO: Change effect names to enum symbols
     def add_effect(self, effect_type, strength, duration):
         # Applies the knockout effect
         if effect_type == Effect.KNOCKOUT:
@@ -753,7 +752,6 @@ class playerClass(Character):
 
     # Updates each active effect on the player by subtracting time from the duration property
     # of each effect, then reversing and removing expired effects
-    # TODO: Change effect names to enum symbols
     def update_effect(self):
         # Gets the time passed since last tick
         dt = Clock.get_time()
