@@ -700,17 +700,11 @@ if __name__ == "__main__":
             if not game_init:
                 playerSprite = playerClass("player", 0, 0, 32, 48, RED, health, player_accel,
                                            ((max_dx, min_dx), (max_dy, min_dy)), 1, 0.4)
-                # Represents the area of the course
-                CourseArea = pygame.Rect(0, 0, 1.5 * native_res[0], native_res[1])
-                # Represents the level clear area
-                EndArea = pygame.Rect(1920, 0, 0.5 * native_res[0], native_res[1])
                 # Resetting money and score
                 reset_money_score()
                 # Initialising the HUD's image list
                 Hud = HUD(playerSprite.get_hp(), playerSprite.get_max_hp(), get_money(), get_points())
-                # Camera object that allows the screen to scroll across the course
-                GameCam = Camera(native_res, (10, 10))
-                # Create game images
+                # Create Pause screen components
                 Overlay = pygame.Surface(native_res)
                 Overlay.set_alpha(128)
                 pauseText = headerFont.render("Paused", False, RED)
@@ -730,11 +724,13 @@ if __name__ == "__main__":
                 end = int(Metadata["end"])
                 end_pos = (end*tile_dim[0], 0)
                 end_area = ((length-end)*tile_dim[0], height*tile_dim[1])
+                # Represents the level clear area
                 EndArea = pygame.Rect(end_pos, end_area)
                 buildLevel(Map, Metadata, tile_dim, (Drawables, playerGroup, Collidables, Platforms))
                 Wave = Tsunami("wave", -length*tile_dim[0], 0, length*tile_dim[0], height*tile_dim[0], BLUE, 5, 5000)
                 Drawables.add(Wave, layer=5)
                 Collidables.add(Wave)
+                # Camera object that allows the screen to scroll across the course
                 GameCam = Camera(native_res, (length*tile_dim[0], height*tile_dim[1]))
                 tile_progress = 0
                 loaded = True
