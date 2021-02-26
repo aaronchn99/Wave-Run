@@ -32,7 +32,7 @@ bind_time = 5000        # Milliseconds before key binding is cancelled
 '''Classes'''
 class Camera(object):
     # Camera constants
-    CAM_DIM = (768, 420)        # Size of world camera
+    CAM_DIM = (512, 280)        # Size of world camera
     VIEW_POS = (0, 208)         # Position of viewport on window frame
     VIEW_DIM = (native_res[0], native_res[1]-208) # Size of viewport when drawn on frame
 
