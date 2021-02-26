@@ -815,10 +815,10 @@ class playerClass(Character):
 
     # Sets the scroll amount depending on how far away the player is from the center of
     # the screen
-    def set_scroll(self, resolution):
-        center = [resolution[0]/2, resolution[1]/2]
-        dx = self._x - center[0]
-        dy = self._y - center[1]
+    def set_scroll(self, cam_area):
+        center = (cam_area[0]/2, cam_area[1]/2)
+        dx = self._x + (self._w/2) - center[0]
+        dy = self._y + (self._h/2) - center[1]
         return -dx, -dy
 
     # Starts the player's invincibility mode

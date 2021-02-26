@@ -31,12 +31,17 @@ bind_time = 5000        # Milliseconds before key binding is cancelled
 
 '''Classes'''
 class Camera(object):
+    # Camera constants
+    CAM_DIM = (768, 420)        # Size of world camera
+    VIEW_POS = (0, 208)         # Position of 
+    VIEW_DIM = (native_res[0], native_res[1]-208)
+
     # Camera handles scrolling of sprites, so that player is in center
     # Params:
     # cam_dim - Width & height of visible area (aka screen size)
     # course_dim - Width & height of course
-    def __init__(self, cam_dim, course_dim):
-        self._camRect = pygame.Rect((0, 0), cam_dim)
+    def __init__(self, course_dim):
+        self._camRect = pygame.Rect((0, 0), self.CAM_DIM)
         self._courseRect = pygame.Rect((0, 0), course_dim)
         self._vel = (0, 0)
 
@@ -44,7 +49,7 @@ class Camera(object):
     # Params:
     # player - The player sprite
     def set_scroll(self, player):
-        self._vel = player.set_scroll(native_res)
+        self._vel = player.set_scroll(self.CAM_DIM)
         dx, dy = self._vel
         if self._courseRect.left + dx >= self._camRect.left:
             dx = self._camRect.left - self._courseRect.left
@@ -73,10 +78,32 @@ class Camera(object):
         endRect.x += dx
         endRect.y += dy
 
+    # Draws sprites onto camera view and returns it as Surface
+    # Params:
+    # sprites - Pygame group containing drawable sprites
+    def draw_camera(self, sprites):
+        # Surface to draw game world from view of Camera
+        Viewport = pygame.Surface(Camera.CAM_DIM, flags=pygame.SRCALPHA)
+        # Game objects and sprites are drawn
+        sprites.draw(Viewport)
+        return Viewport
+    
+    # Draws Camera viewport to specified Surface
+    # Params:
+    # sprites - Pygame group containing drawable sprites
+    # surface - Destination surface to draw viewport onto
+    def draw_to_surface(self, sprites, surface):
+        Viewport = self.draw_camera(sprites)
+        # Scale camera viewport
+        Viewport = pygame.transform.scale(Viewport, self.VIEW_DIM)
+        # Viewport drawn below HUD
+        surface.blit(Viewport, self.VIEW_POS)
+
 
 class HUD(object):
     # HUD Constants
     HUD_POS = (0, 0)
+    HUD_DIM = (native_res[0], 208)
     HP_POS = (78, 16)
     HEART_DIM = (70, 65)
     GOLD_POS = (660, 16)
@@ -89,7 +116,7 @@ class HUD(object):
     # Params: (See hud_update)
     def __init__(self, health, max_hp, money, score):
         # HUD background is rendered (TODO: Replace with custom background)
-        self.background = pygame.Surface((native_res[0], 208))
+        self.background = pygame.Surface(self.HUD_DIM)
         self.background.fill(BLACK)
         # Using the font loaded in the loading procedure, Text objects are set up and rendered
         # first for the variable labels
@@ -227,8 +254,10 @@ def game_over():
 def lvl_clear(inputs):
     # First, the window is filled white
     Frame.fill(WHITE)
-    # Game objects and sprites are drawn next
-    Drawables.draw(Frame)
+    # Draw camera to Frame
+    GameCam.draw_to_surface(Drawables, Frame)
+    # Draw HUD
+    Hud.draw_hud(Frame)
     playerSprite.update({"key": [right_key]}, (), Platforms, playerGroup)
     winText = headerFont.render("Level Clear", False, GREEN)
     continueText = subFont.render("Press any key to continue", False, GREEN)
@@ -730,8 +759,8 @@ if __name__ == "__main__":
                 Wave = Tsunami("wave", -length*tile_dim[0], 0, length*tile_dim[0], height*tile_dim[0], BLUE, 5, 5000)
                 Drawables.add(Wave, layer=5)
                 Collidables.add(Wave)
-                # Camera object that allows the screen to scroll across the course
-                GameCam = Camera(native_res, (length*tile_dim[0], height*tile_dim[1]))
+                # Camera object that views into world (scrolls screen through course)
+                GameCam = Camera((length*tile_dim[0], height*tile_dim[1]))
                 tile_progress = 0
                 loaded = True
 
@@ -822,8 +851,8 @@ if __name__ == "__main__":
             ''' Output Procedure '''
             # First, the window is filled white
             Frame.fill(WHITE)
-            # Game objects and sprites are drawn next
-            Drawables.draw(Frame)
+            # Draw camera to Frame
+            GameCam.draw_to_surface(Drawables, Frame)
             # Finally, the HUD is drawn
             Hud.draw_hud(Frame)
             pauseButton.draw()
