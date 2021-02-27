@@ -1,4 +1,4 @@
-from variables import *
+from var.variables import *
 import random as rand
 hitbox_mode = 0
 

@@ -1,8 +1,8 @@
 ''' Initialisation Procedure '''
 # Pygame and window initialisation
 import random as rand
-from Sprites import *
-from MenuObjs import *
+from entity.Sprites import *
+from gui.MenuObjs import *
 import os
 import ctypes
 import pygame.freetype

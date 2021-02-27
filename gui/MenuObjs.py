@@ -1,5 +1,5 @@
-from variables import *
-from Sprites import Entity
+from var.variables import *
+from entity.Sprites import Entity
 p_speed = 5
 
 

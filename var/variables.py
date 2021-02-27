@@ -1,7 +1,4 @@
-import pygame
-import json
-import math
-import enum
+import pygame, json, math, enum, os
 pygame.init()
 
 
@@ -184,10 +181,11 @@ money = 0
 score = 0
 health = 5
 # Configs
-with open("configs\\upgrades.cfg", "r") as config:
+file_dir = os.path.dirname(os.path.realpath(__file__))
+with open(os.path.join(file_dir, "configs/upgrades.cfg"), "r") as config:
     upgrades = json.load(config)
 # Physics constants and variables
-with open("configs\\playerphysics.cfg", "r") as config:
+with open(os.path.join(file_dir, "configs/playerphysics.cfg"), "r") as config:
     physics = json.load(config)
 player_accel = physics["acc"]
 max_dy = physics["dy"]
