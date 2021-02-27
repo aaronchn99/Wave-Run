@@ -372,14 +372,14 @@ def buildLevel(map, metadata, tile_dim, Groups):
                 Collidables.add(crate)
                 Drawables.add(crate, layer=3)
             elif tile == "S":
-                dock = ShipDock(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 1000, 10000, 3000, 1000, dock_color=GREEN,
+                dock = ShipDock(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 1000, 10000, 3000, 1000, (1,1), (1,1), dock_color=GREEN,
                                  ship_w=400, ship_h=200, ship_color=BLUE)
                 dock.ship_on_water(int(metadata["height"])*tile_dim[1])
                 Drawables.add(dock, layer=3)
                 Collidables.add(dock)
                 dock.ship_drawable(Drawables)
             elif tile == "F":
-                cannon = Cannon(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 100, 10000, 2000, 30, color=YELLOW)
+                cannon = Cannon(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 100, 10000, 2000, 30, (1,1), (1,1), color=YELLOW)
                 Drawables.add(cannon, layer=3)
                 Collidables.add(cannon)
             elif tile == "P":
