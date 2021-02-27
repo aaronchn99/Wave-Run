@@ -202,6 +202,7 @@ WHITE = (255, 255, 255)
 YELLOW = (255, 255, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
+LIGHT_BLUE = (100, 200, 255)
 # Controls
 left_key = pygame.K_LEFT
 right_key = pygame.K_RIGHT

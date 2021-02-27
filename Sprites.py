@@ -24,21 +24,21 @@ class Entity(pygame.sprite.Sprite):
         # An image of the Sprite is assigned by creating a new Surface object and filling
         # it with the specified colour
         if image != None:
-            self.image = image
+            self.image = image.convert_alpha()
             self.image = pygame.transform.scale(self.image, (self._w, self._h))
             self._render_mode = "image"
         elif color != None:
-            self.image = pygame.Surface((self._w, self._h))
+            self.image = pygame.Surface((self._w, self._h), flags=pygame.SRCALPHA)
             self.image.fill(color)
             self._render_mode = "color"
         elif frames != None:
-            self._frames = frames
+            self._frames = list(map(lambda f: f.convert_alpha(), frames))
             self._animate_fps = fps
             self._current_frame = current_frame
             self.image = frames[current_frame]
             self._render_mode = "animate"
         else:
-            self.image = pygame.Surface((self._w, self._h))
+            self.image = pygame.Surface((self._w, self._h), flags=pygame.SRCALPHA)
             self._render_mode = "black"
         if hitbox_mode:
             pygame.draw.rect(self.image, GREEN, (0,0,self._w,self._h), 1)

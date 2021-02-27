@@ -32,9 +32,9 @@ bind_time = 5000        # Milliseconds before key binding is cancelled
 '''Classes'''
 class Camera(object):
     # Camera constants
-    CAM_DIM = (512, 280)        # Size of world camera
-    VIEW_POS = (0, 208)         # Position of viewport on window frame
-    VIEW_DIM = (native_res[0], native_res[1]-208) # Size of viewport when drawn on frame
+    CAM_DIM = (native_res[0]/2, native_res[1]/2)        # Size of world camera
+    VIEW_POS = (0, 0)         # Position of viewport on window frame
+    VIEW_DIM = (native_res[0], native_res[1]) # Size of viewport when drawn on frame
 
     # Camera handles scrolling of sprites, so that player is in center
     # Params:
@@ -188,7 +188,7 @@ class HUD(object):
     # Draws the HUD objects on screen. Takes the window surface and the list of HUD elements
     def draw_hud(self, screen):
         # The image of the HUD background is drawn on the window
-        screen.blit(self.background, self.HUD_POS)
+        # screen.blit(self.background, self.HUD_POS)
         # The Hearts label is drawn
         screen.blit(self.hpLabel, self.HP_POS)
         # The list of hearts to be drawn is put together as one Surface object and centre-aligned
@@ -197,7 +197,7 @@ class HUD(object):
             heartRect = pygame.Rect(0, 0, (self.HEART_DIM[0]+3)*len(self.Hearts)-3, self.HEART_DIM[1])
             heartRect.midtop = self.hpLabel.get_rect(topleft=self.HP_POS).midbottom
             heartRect.y += 8
-            Hearts = pygame.Surface(heartRect.size)
+            Hearts = pygame.Surface(heartRect.size, flags=pygame.SRCALPHA)
             for i in range(len(self.Hearts)):
                 Hearts.blit(self.HeartSprites[self.Hearts[i]], ((self.HEART_DIM[0]+3) * i, 0))
             screen.blit(Hearts, heartRect.topleft)
@@ -222,16 +222,16 @@ class HUD(object):
             spriteRect = pygame.Rect(0, 0, (self.EFFECT_SPRITE_DIM[0]+5)*len(effect_list)-5, self.EFFECT_SPRITE_DIM[1])
             spriteRect.midtop = self.effectLabel.get_rect(topleft=self.EFFECT_POS).midbottom
             spriteRect.y += 8
-            effectSurf = pygame.Surface(spriteRect.size)
+            effectSurf = pygame.Surface(spriteRect.size, flags=pygame.SRCALPHA)
             for i in range(len(effect_list)):
                 effectSurf.blit(self.EffectSprites[effect_list[i]], ((self.EFFECT_SPRITE_DIM[0]+5) * i, 0))
             screen.blit(effectSurf, spriteRect.topleft)
-        # Draws the progress label
-        screen.blit(self.progressLabel, self.PROGRESS_POS)
-        # Draws the progress bar next to the label
-        pos = list(self.progressLabel.get_rect(topleft=self.PROGRESS_POS).topright)
-        pos[0] += 20
-        screen.blit(self.progressBar, pos)
+        # # Draws the progress label
+        # screen.blit(self.progressLabel, self.PROGRESS_POS)
+        # # Draws the progress bar next to the label
+        # pos = list(self.progressLabel.get_rect(topleft=self.PROGRESS_POS).topright)
+        # pos[0] += 20
+        # screen.blit(self.progressBar, pos)
 
 
 ''' Procedures and Functions '''
@@ -253,7 +253,7 @@ def game_over():
 # Procedure that runs the level transition
 def lvl_clear(inputs):
     # First, the window is filled white
-    Frame.fill(WHITE)
+    Frame.fill(LIGHT_BLUE)
     # Draw camera to Frame
     GameCam.draw_to_surface(Drawables, Frame)
     # Draw HUD
@@ -850,7 +850,7 @@ if __name__ == "__main__":
 
             ''' Output Procedure '''
             # First, the window is filled white
-            Frame.fill(WHITE)
+            Frame.fill(LIGHT_BLUE)
             # Draw camera to Frame
             GameCam.draw_to_surface(Drawables, Frame)
             # Finally, the HUD is drawn
