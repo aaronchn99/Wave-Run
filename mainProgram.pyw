@@ -760,7 +760,7 @@ if __name__ == "__main__":
                 # Represents the level clear area
                 EndArea = pygame.Rect(end_pos, end_area)
                 buildLevel(Map, Metadata, tile_dim, (Drawables, playerGroup, Collidables, Platforms))
-                Wave = Tsunami("wave", -length*tile_dim[0], 0, length*tile_dim[0], height*tile_dim[0], BLUE, 5, 5000)
+                Wave = Tsunami("wave", -length*tile_dim[0], 0, length*tile_dim[0], height*tile_dim[0], 5, 5000, color=BLUE)
                 Drawables.add(Wave, layer=5)
                 Collidables.add(Wave)
                 # Camera object that views into world (scrolls screen through course)

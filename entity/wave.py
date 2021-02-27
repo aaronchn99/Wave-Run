@@ -4,10 +4,12 @@ from .Sprites import Obstacle
 # Class for the chasing wave enemy
 class Tsunami(Obstacle):
     # Class constructor
-    def __init__(self, name, x, y, width, height, color, speed, delay, image=None, frames=None, fps=1, current_frame=0):
+    def __init__(self, name, x, y, width, height, speed, delay, 
+        increasers=(1,1), decreasers=(1,1),
+        color=None, image=None, frames=None, fps=1, current_frame=0):
         super().__init__(name, x, y, width, height, 9999, 0, 0, color, image, frames, fps, current_frame)
-        self._speed = speed     # How far the wave moves per tick
-        self._delay = delay     # The delay before the wave starts moving
+        self._speed = round(speed*increasers[0]*increasers[1])     # How far the wave moves per tick
+        self._delay = round(delay*decreasers[0]*decreasers[1])     # The delay before the wave starts moving
         self._start_pos = (x, y)
         self._counting_delay = delay
 
