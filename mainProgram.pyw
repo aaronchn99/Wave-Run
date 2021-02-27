@@ -1,14 +1,18 @@
 ''' Initialisation Procedure '''
 # Pygame and window initialisation
 import random as rand
-from entity.Sprites import *
-from gui.MenuObjs import *
-import os
-import ctypes
-import pygame.freetype
+import os, ctypes, pygame.freetype
 os.environ['SDL_VIDEO_WINDOW_POS'] = "100, 100" # Set window position, prevents window from being placed offscreen
 pygame.init()
+
+from entity.Sprites import *
+from entity.player import playerClass, update_controls
+from entity.platforms import Platform
+from entity.wave import Tsunami
+from entity.non_player import *
+from gui.MenuObjs import *
 from Images import *
+from var.variables import *
 import platform
 if platform.release() in ("Vista", "7", "8", "9", "10"):
     # Set the program to be DPI aware to avoid window stretching (Only for Vista or later)
