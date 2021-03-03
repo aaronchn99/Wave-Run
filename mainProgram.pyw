@@ -751,7 +751,7 @@ if __name__ == "__main__":
                 playerGroup = pygame.sprite.GroupSingle()
                 Collidables = pygame.sprite.Group()
                 Platforms = pygame.sprite.Group()
-                Map, Metadata = loadLevel("levels\lvl"+str(level)+".ldat")
+                Map, Metadata = loadLevel("level\lvl"+str(level)+".ldat")
                 length = int(Metadata["length"])
                 height = int(Metadata["height"])
                 end = int(Metadata["end"])
@@ -963,7 +963,7 @@ if __name__ == "__main__":
             cont = lvl_clear(inputs)
             if cont:
                 level += 1
-                if level > len(os.listdir("levels")):
+                if level > len(os.listdir("level")):
                     mode = ScreenMode.WIN
                 else:
                     mode = ScreenMode.SHOP

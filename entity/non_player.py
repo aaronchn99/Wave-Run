@@ -302,21 +302,38 @@ class Horse(SpecialItem):
 
 
 ''' Subclasses for each type of Enemy '''
+# 
 class Pirate(Enemy):
-    def __init__(self):
-        return
+    def __init__(self, name, x, y, width, height,
+        increasers=(1,1), decreasers=(1,1),
+        color=None, image=None, frames=None, fps=1, current_frame=0):
+        health, strength, armor, damage, win_points, lose_points = 3, 2, 0.4, 2, 100, 300
+        color=(0,0,0)
+        super().__init__(name, x, y, width, height, color, health, strength, armor, damage, win_points, lose_points)
 
 
 class Redcoat(Enemy):
-    def __init__(self):
-        return
+    def __init__(self, name, x, y, width, height,
+        increasers=(1,1), decreasers=(1,1),
+        color=None, image=None, frames=None, fps=1, current_frame=0):
+        health, strength, armor, damage, win_points, lose_points = 3, 2, 0.4, 2, 100, 300
+        color=(255,0,0)
+        super().__init__(name, x, y, width, height, color, health, strength, armor, damage, win_points, lose_points)
 
 
 class Parrot(Enemy):
-    def __init__(self):
-        return
+    def __init__(self, name, x, y, width, height,
+        increasers=(1,1), decreasers=(1,1),
+        color=None, image=None, frames=None, fps=1, current_frame=0):
+        health, strength, armor, damage, win_points, lose_points = 3, 2, 0.4, 2, 100, 300
+        color=(0,255,0)
+        super().__init__(name, x, y, width, height, color, health, strength, armor, damage, win_points, lose_points)
 
 
 class Skeleton(Enemy):
-    def __init__(self):
-        return
+    def __init__(self, name, x, y, width, height,
+        increasers=(1,1), decreasers=(1,1),
+        color=None, image=None, frames=None, fps=1, current_frame=0):
+        health, strength, armor, damage, win_points, lose_points = 3, 2, 0.4, 2, 100, 300
+        color=(255,255,255)
+        super().__init__(name, x, y, width, height, color, health, strength, armor, damage, win_points, lose_points)
