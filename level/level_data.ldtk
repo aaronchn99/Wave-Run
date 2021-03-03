@@ -473,7 +473,7 @@
 					"textLangageMode": null
 				},
 				{
-					"identifier": "effect_type",
+					"identifier": "effect_types",
 					"__type": "Array<LocalEnum.Effect_type>",
 					"uid": 72,
 					"type": { "id": "F_Enum", "params": [68] },

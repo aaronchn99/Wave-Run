@@ -13,6 +13,7 @@ from entity.non_player import *
 from gui.MenuObjs import *
 from Images import *
 from var.variables import *
+from images.Image import *
 import platform
 if platform.release() in ("Vista", "7", "8", "9", "10"):
     # Set the program to be DPI aware to avoid window stretching (Only for Vista or later)
@@ -239,12 +240,6 @@ class HUD(object):
 
 
 ''' Procedures and Functions '''
-# Crops an image with the specified position of the top left corner and the area
-def crop(Image, pos, area):
-    crop_area = pygame.Surface(area, pygame.SRCALPHA)
-    crop_area.blit(Image, (-pos[0], -pos[1]))
-    return crop_area
-
 # Procedure that runs the game over sequence
 def game_over():
     loseMenu.update(inputs)
@@ -376,8 +371,8 @@ def buildLevel(map, metadata, tile_dim, Groups):
                 Collidables.add(crate)
                 Drawables.add(crate, layer=3)
             elif tile == "S":
-                dock = ShipDock(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 1000, 10000, 3000, 1000, (1,1), (1,1), dock_color=GREEN,
-                                 ship_w=400, ship_h=200, ship_color=BLUE)
+                dock = ShipDock(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 1000, 10000, 3000, 1000, (1,1), (1,1), 
+                    dock_color=GREEN, ship_w=400, ship_h=200, ship_color=BLUE)
                 dock.ship_on_water(int(metadata["height"])*tile_dim[1])
                 Drawables.add(dock, layer=3)
                 Collidables.add(dock)

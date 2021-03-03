@@ -14,7 +14,8 @@ class World:
     # Reads each of the level data files (produced from the LDtk editor)
     # Stores levels in list
     def parse_json(self, path):
-        dirpath = os.path.dirname(path)
+        # Full directory path of level package
+        dirpath = os.path.realpath(os.path.dirname(path))
         with open(path, "r") as fp:
             data = json.load(fp)
             for lvl_data in data["levels"]:

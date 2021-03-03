@@ -1,15 +1,28 @@
-import json, pygame, enum
+import json, pygame, enum, os
+
+from entity.wave import Tsunami
+from entity.platforms import Platform
+from entity.non_player import *
+
+from images.Image import crop
+
+# Load spritesheets (TODO: Temporary, to be replaced by loader in Level/World class)
+rootdir = os.path.dirname(os.path.dirname(__file__))
+EntitySheet = pygame.image.load(os.path.join(rootdir, "images\\ItemObstacles.png"))
+CoinSheet = pygame.image.load(os.path.join(rootdir, "images\\Coin.png"))
+# Crop and arrange each frame of coin sprite
+coin_frames = []
+for i in range(8):
+    coin_frames.append(crop(CoinSheet, (40*i, 0), (40, 40)))
 
 
 # Maintains level data (e.g. level size, platform and sprite info)
 # Used to build level
 class Level:
-    sprite_class_map = {
-
-    }
-
     # Takes path of level data file (i.e. ldtkl file)
     def __init__(self, path):
+        # Full directory path of level package
+        dirpath = os.path.realpath(os.path.dirname(os.path.dirname(path)))
         with open(path, "r") as fp:
             data = json.load(fp)
             self.name = data["identifier"]
@@ -26,18 +39,19 @@ class Level:
             layers = data["layerInstances"]
             # Player
             player = layers[0]["entityInstances"][0]
-            self.player_pos = player["px"]
+            self.player_x, self.player_y = player["px"]
             self.player_size = (player["width"], player["height"])
             # Sprites
             sprites = layers[1]["entityInstances"]
             self.sprites_data = self.__parse_sprites(sprites)
             # Endpoint
             self.end_pos = layers[2]["entityInstances"][0]["px"]
+            self.end_pos[1] = 0     # End Y set to top of level
             # Platforms
             platform_layer = layers[3]
-            self.platform_grid_w = platform_layer["__gridSize"]
+            self.platform_size = [platform_layer["__gridSize"] for i in range(2)]
+            self.platform_tilepath = os.path.join(dirpath, platform_layer["__tilesetRelPath"])
             self.platforms_data = self.__parse_platforms(platform_layer["gridTiles"])
-
 
     # Selects the required information for all sprite instances and returns as list
     def __parse_sprites(self, data):
@@ -45,13 +59,26 @@ class Level:
         for d_i in data:
             sprite = {
                 "type": d_i["__identifier"],
-                "w": d_i["width"],
-                "h": d_i["height"],
+                "width": d_i["width"],
+                "height": d_i["height"],
                 "x": d_i["px"][0],
                 "y": d_i["px"][1],
             }
+            sprite["name"] = str(sprite["x"])+"-"+str(sprite["y"])
             for field in d_i["fieldInstances"]:
-                sprite[field["__identifier"]] = field["__value"]
+                if field["__identifier"] == "effect_types":
+                    effect_types = field["__value"]
+                elif field["__identifier"] == "effect_amounts":
+                    effect_amounts = field["__value"]
+                elif field["__identifier"] == "effect_durations":
+                    effect_durations = field["__value"]
+                else:
+                    sprite[field["__identifier"]] = field["__value"]
+            try:
+                effects = tuple(zip(effect_types, effect_amounts, effect_durations))
+                sprite["effects"] = effects
+            except NameError:
+                pass
             sprites.append(sprite)
         return sprites
     
@@ -60,6 +87,7 @@ class Level:
         platforms = list()
         for d_i in data:
             platforms.append({
+                "name": str(d_i["px"][0])+"-"+str(d_i["px"][1]),
                 "x": d_i["px"][0],
                 "y": d_i["px"][1],
                 "src": d_i["src"],
@@ -69,17 +97,114 @@ class Level:
     # Using the parsed level data, build sprite groups containing the level objects
     # Param:
     # player - Sprite object of player (Created outside of level to maintain traits across levels)
+    # global_diff_inc - Difficulty increasing modifier set from settings
+    # global_diff_dec - Difficulty decreasing modifier set from settings
     # Returns:
     # Drawables - Group of visible sprites
     # Collidables - Group of sprites that collide with player
     # Platforms - Group of platforms
+    # playerGroup - Single sprite group containing the player (for collision detection)
     # EndRect - Rect object covering finish area of level
     # Wave - Tsunami instance
-    def build(self, player):
-        return 
+    def build(self, player, global_diff_inc, global_diff_dec):
+        # Create Sprite Groups
+        Drawables = pygame.sprite.LayeredUpdates()
+        playerGroup = pygame.sprite.GroupSingle()
+        Collidables = pygame.sprite.Group()
+        Platforms = pygame.sprite.Group()
+        # Build end area Rect
+        end_area = (self.w-self.end_pos[0], self.h)
+        EndRect = pygame.Rect(self.end_pos, end_area)
+        # Set player position, reset effects, velocity and add to groups
+        player.set_pos(self.player_x, self.player_y)
+        player.clear_effects()
+        player.set_vel(0,0)
+        playerGroup.add(player)
+        Drawables.add(player, layer=4)
+        # Build platforms from level data
+        self.__build_platforms(Collidables, Platforms, Drawables)
+        # Build sprites from level data
+        self.__build_sprites(Collidables, Drawables, global_diff_inc, global_diff_dec)
+        # Create Wave
+        Wave = Tsunami("wave", -self.w, 0, self.w, self.h, 5, 5000, color=(0,0,255))
+        Drawables.add(Wave, layer=5)
+        Collidables.add(Wave)
+        # Output Groups and other objects required by game
+        return Drawables, Collidables, Platforms, playerGroup, EndRect, Wave
     
+    def __build_platforms(self, Collidables, Platforms, Drawables):
+        PlatformSheet = pygame.image.load(self.platform_tilepath)
+        for p_i in self.platforms_data:
+            platform = Platform(**p_i,
+                width=self.platform_size[0], height=self.platform_size[1],
+                image=crop(PlatformSheet, p_i["src"], self.platform_size)
+            )
+            Collidables.add(platform)
+            Platforms.add(platform)
+            Drawables.add(platform, layer=2)
+    
+    def __build_sprites(self, Collidables, Drawables, global_inc, global_dec):
+        for sprite_d in self.sprites_data:
+            sprite_d["increasers"] = (global_inc, self.difficult_inc)
+            sprite_d["decreasers"] = (global_dec, self.difficult_dec)
+            # Item Sprites
+            if sprite_d["type"] == "Coin":
+                Sprite = Coin(**sprite_d,
+                    frames=coin_frames, fps=8)
+            elif sprite_d["type"] == "Treasure":
+                Sprite = Treasure(**sprite_d,
+                    image=crop(EntitySheet, (40, 0), (40, 40)))
+            elif sprite_d["type"] == "Bandage":
+                Sprite = Bandage(**sprite_d,
+                    image=crop(EntitySheet, (80, 0), (40, 40)))
+            elif sprite_d["type"] == "Medkit":
+                Sprite = Medkit(**sprite_d,
+                    image=crop(EntitySheet, (0, 40), (40, 40)))
+            elif sprite_d["type"] == "Rum":
+                Sprite = Rum(**sprite_d,
+                    image=crop(EntitySheet, (40, 40), (40, 40)))
+            # Obstacle Sprites
+            elif sprite_d["type"] == "Anchor":
+                Sprite = Anchor(**sprite_d,
+                    image=crop(EntitySheet, (0, 80), (40, 40)))
+            elif sprite_d["type"] == "Barrel":
+                Sprite = Barrel(**sprite_d,
+                    image=crop(EntitySheet, (40, 80), (40, 40)))
+            elif sprite_d["type"] == "Crate":
+                Sprite = Crate(**sprite_d,
+                    image=crop(EntitySheet, (80, 80), (40, 40)))
+            # Special Item Sprites
+            elif sprite_d["type"] == "Horse":
+                Sprite = Horse(**sprite_d,
+                    image=crop(EntitySheet, (80, 40), (40, 40)))
+            elif sprite_d["type"] == "ShipDock":
+                Sprite = ShipDock(**sprite_d,
+                    dock_color=GREEN, ship_w=400, ship_h=200, ship_color=BLUE)
+                Sprite.ship_on_water(self.h)
+                Sprite.ship_drawable(Drawables)
+            elif sprite_d["type"] == "Cannon":
+                Sprite = Cannon(**sprite_d,
+                    color=YELLOW)
+            # Enemy Sprites
+            elif sprite_d["type"] == "Pirate":
+                Sprite = Pirate(**sprite_d,
+                    color=(0, 0, 0))
+            elif sprite_d["type"] == "Redcoat":
+                Sprite = Redcoat(**sprite_d,
+                    color=(255, 0, 0))
+            elif sprite_d["type"] == "Parrot":
+                Sprite = Parrot(**sprite_d,
+                    color=(0, 255, 0))
+            elif sprite_d["type"] == "Skeleton":
+                Sprite = Skeleton(**sprite_d,
+                    color=(255, 255, 255))
+            # Add Sprite to groups
+            Collidables.add(Sprite)
+            Drawables.add(Sprite, layer=3)
+
     @staticmethod
     # Takes sprite groups from game and destroys all sprites in these groups
     def destroy(*groups):
         for group in groups:
-            group.empty()
+            for sprite in group:
+                sprite.kill()

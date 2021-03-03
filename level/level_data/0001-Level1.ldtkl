@@ -571,7 +571,7 @@
 						{ "__identifier": "angle", "__value": 0, "__type": "Float", "defUid": 63, "realEditorValues": [] },
 						{ "__identifier": "points", "__value": 0, "__type": "Int", "defUid": 67, "realEditorValues": [] },
 						{
-							"__identifier": "effect_type",
+							"__identifier": "effect_types",
 							"__value": [ "FAST", "DIZZY" ],
 							"__type": "Array<LocalEnum.Effect_type>",
 							"defUid": 72,
