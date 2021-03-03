@@ -149,7 +149,9 @@ def find_res(resolution):
                 screen_fit = True
     return (width, height)
 
-
+# File paths
+rootdir = os.path.dirname(os.path.dirname(__file__))
+LEVEL_ROOT = os.path.join(rootdir, "level/level_data.ldtk")
 # Pygame environment variables
 window_name = "Game"
 avail_resmodes = ["1920x1080", "1920x1200", "1280x1024", "1366x768", "1280x800",

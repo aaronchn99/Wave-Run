@@ -1,7 +1,7 @@
 ''' Initialisation Procedure '''
 # Pygame and window initialisation
 import random as rand
-import os, ctypes, pygame.freetype
+import os, ctypes, pygame.freetype, platform
 os.environ['SDL_VIDEO_WINDOW_POS'] = "100, 100" # Set window position, prevents window from being placed offscreen
 pygame.init()
 
@@ -14,7 +14,9 @@ from gui.MenuObjs import *
 from Images import *
 from var.variables import *
 from images.Image import *
-import platform
+from level.World import World
+from level.Level import Level
+
 if platform.release() in ("Vista", "7", "8", "9", "10"):
     # Set the program to be DPI aware to avoid window stretching (Only for Vista or later)
     user32 = ctypes.windll.user32
@@ -281,124 +283,6 @@ def game_win():
     pos = continueText.get_rect(center=(int(native_res[0] / 2), int(native_res[1] / 2 + 100))).topleft
     Frame.blit(continueText, pos)
 
-# Loads the data needed for a level from a level data file. It separates the
-# data into 2 parts: mapping array and metadata and returns them
-def loadLevel(filename):
-    filePointer = open(filename, "r")
-    map = []
-    metadata = {}
-    read_list = filePointer.readlines()
-    data_type = ""
-    for line in read_list:
-        if "\n" in line:
-            line = line.replace("\n", "")
-        if line == "map":
-            data_type = "map"
-        elif line == "metadata":
-            data_type = "metadata"
-        elif line == "":
-            data_type = ""
-        elif data_type == "map":
-            row = []
-            for tile in line:
-                row.append(tile)
-            map.append(row)
-        elif data_type == "metadata":
-            temp = line.split(':')
-            metadata[temp[0]] = temp[1]
-    return map, metadata
-
-# Builds the level by checking each tile in the 2D mapping array
-# and creating the sprite corresponding to that tile
-def buildLevel(map, metadata, tile_dim, Groups):
-    Drawables, playerGroup, Collidables, Platforms = Groups
-    for y in range(len(map)):
-        for x in range(len(map[y])):
-            pos = (x * tile_dim[0], y * tile_dim[1])
-            tile = map[y][x]
-            name = str(x) + str(y)
-            if tile == " ":
-                pass
-            elif tile == "#":
-                platform = Platform(name, pos[0], pos[1], tile_dim[0], tile_dim[1],
-                                    image=crop(PlatformSheet, (0, 0), (40, 40)))
-                for Group in (Collidables, Platforms):
-                    Group.add(platform)
-                Drawables.add(platform, layer=2)
-            elif tile == "C":
-                coin = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], rand.randint(5, 20), [Effect.MONEY, 1, 0],
-                            frames=coin_frames, fps=8)
-                Collidables.add(coin)
-                Drawables.add(coin, layer=3)
-            elif tile == "T":
-                chest = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], rand.randint(25, 50),
-                             [Effect.MONEY, 20, 0], image=crop(EntitySheet, (40, 0), (40, 40)))
-                Collidables.add(chest)
-                Drawables.add(chest, layer=3)
-            elif tile == "B":
-                bandage = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 0, [Effect.HEALTH, 1, 0],
-                               image=crop(EntitySheet, (80, 0), (40, 40)))
-                Collidables.add(bandage)
-                Drawables.add(bandage, layer=3)
-            elif tile == "M":
-                medkit = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 0, [Effect.HEALTH, 999, 0],
-                              image=crop(EntitySheet, (0, 40), (40, 40)))
-                Collidables.add(medkit)
-                Drawables.add(medkit, layer=3)
-            elif tile == "R":
-                rum = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], rand.randint(50, 100),
-                           [[Effect.HEALTH, 2, 0], [Effect.SLOW, 150, 10000]], image=crop(EntitySheet, (40, 40), (40, 40)))
-                Collidables.add(rum)
-                Drawables.add(rum, layer=3)
-            elif tile == "H":
-                horse = Item(name, pos[0], pos[1], tile_dim[0], tile_dim[1], rand.randint(100, 200),
-                             [Effect.FAST, 240, 15000], image=crop(EntitySheet, (80, 40), (40, 40)))
-                Collidables.add(horse)
-                Drawables.add(horse, layer=3)
-            elif tile == "A":
-                anchor = Obstacle(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 1, 200, 4000,
-                                  image=crop(EntitySheet, (0, 80), (40, 40)))
-                Collidables.add(anchor)
-                Drawables.add(anchor, layer=3)
-            elif tile == "N":
-                barrel = Obstacle(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 1, 200, 3000,
-                                  image=crop(EntitySheet, (40, 80), (40, 40)))
-                Collidables.add(barrel)
-                Drawables.add(barrel, layer=3)
-            elif tile == "O":
-                crate = Obstacle(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 1, 200, 2000,
-                                 image=crop(EntitySheet, (80, 80), (40, 40)))
-                Collidables.add(crate)
-                Drawables.add(crate, layer=3)
-            elif tile == "S":
-                dock = ShipDock(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 1000, 10000, 3000, 1000, (1,1), (1,1), 
-                    dock_color=GREEN, ship_w=400, ship_h=200, ship_color=BLUE)
-                dock.ship_on_water(int(metadata["height"])*tile_dim[1])
-                Drawables.add(dock, layer=3)
-                Collidables.add(dock)
-                dock.ship_drawable(Drawables)
-            elif tile == "F":
-                cannon = Cannon(name, pos[0], pos[1], tile_dim[0], tile_dim[1], 100, 10000, 2000, 30, (1,1), (1,1), color=YELLOW)
-                Drawables.add(cannon, layer=3)
-                Collidables.add(cannon)
-            elif tile == "P":
-                global playerSprite
-                playerSprite.set_pos(pos[0], pos[1])
-                playerSprite.clear_effects()
-                playerSprite.set_vel(0, 0)
-                playerGroup.add(playerSprite)
-                Drawables.add(playerSprite, layer=4)
-            elif tile == "E":
-                enemy = Enemy(name, pos[0], pos[1], tile_dim[0], tile_dim[1], (255, 0, 255), 3, 2, 0.4, 2, 100, 300)
-                Collidables.add(enemy)
-                Drawables.add(enemy, layer=3)
-
-# Removes all the objects in the passed Groups and their names
-def destroyLevel(Groups):
-    for group in Groups:
-        for obj in group:
-            obj.kill()
-
 # Procedure that applies the settings passed into it
 def apply_settings(settings):
     global resolution
@@ -440,6 +324,9 @@ if __name__ == "__main__":
     coin_frames = []
     for i in range(8):
         coin_frames.append(crop(CoinSheet, (40*i, 0), (40, 40)))
+
+    # Loading level data
+    game_world = World(LEVEL_ROOT)
 
     ''' Class instances '''
     # Main Menu components
@@ -580,7 +467,7 @@ if __name__ == "__main__":
                     mode = ScreenMode.PLAY       # If the Start New button was triggered, mode is set to "play"
                     game_init = False
                     loaded = False
-                    level = 1
+                    level = game_world.first_level
             if Main.find_obj("setting") != False:
                 button = Main.find_obj("setting")
                 if button.get_trigger():
@@ -742,24 +629,9 @@ if __name__ == "__main__":
 
             # Constructs a new level when not already loaded
             if not loaded:
-                Drawables = pygame.sprite.LayeredUpdates()
-                playerGroup = pygame.sprite.GroupSingle()
-                Collidables = pygame.sprite.Group()
-                Platforms = pygame.sprite.Group()
-                Map, Metadata = loadLevel("level\lvl"+str(level)+".ldat")
-                length = int(Metadata["length"])
-                height = int(Metadata["height"])
-                end = int(Metadata["end"])
-                end_pos = (end*tile_dim[0], 0)
-                end_area = ((length-end)*tile_dim[0], height*tile_dim[1])
-                # Represents the level clear area
-                EndArea = pygame.Rect(end_pos, end_area)
-                buildLevel(Map, Metadata, tile_dim, (Drawables, playerGroup, Collidables, Platforms))
-                Wave = Tsunami("wave", -length*tile_dim[0], 0, length*tile_dim[0], height*tile_dim[0], 5, 5000, color=BLUE)
-                Drawables.add(Wave, layer=5)
-                Collidables.add(Wave)
+                Drawables, Collidables, Platforms, playerGroup, EndArea, Wave = level.build(playerSprite, 1, 1)
                 # Camera object that views into world (scrolls screen through course)
-                GameCam = Camera((length*tile_dim[0], height*tile_dim[1]))
+                GameCam = Camera((level.w, level.h))
                 tile_progress = 0
                 loaded = True
 
@@ -912,7 +784,7 @@ if __name__ == "__main__":
                     dlvl = menu_lvls[trait] - current_lvls[trait]
                     if dlvl > 0:
                         playerSprite.upgrade_trait(trait, dlvl)
-                destroyLevel((Drawables, Collidables, Platforms))
+                Level.destroy(Drawables, Collidables, Platforms)
                 mode = ScreenMode.PLAY                   # Transistions back to the game
                 shop_init = False               # De-initialises shop menu
             # Drawing code
@@ -943,7 +815,7 @@ if __name__ == "__main__":
 
         # The game over procedure is called when the player's health is zero or lower
         elif mode == ScreenMode.LOSE:
-            destroyLevel((Drawables, playerGroup, Collidables, Platforms))
+            Level.destroy(Drawables, playerGroup, Collidables, Platforms)
             option = game_over()
             if option == "main":
                 mode = ScreenMode.MAIN
@@ -951,22 +823,22 @@ if __name__ == "__main__":
                 mode = ScreenMode.PLAY
                 game_init = False
                 loaded = False
-                level = 1
+                level = game_world.first_level
 
         # Handles when the player has cleared a level
         elif mode == ScreenMode.PASS:
             cont = lvl_clear(inputs)
             if cont:
-                level += 1
-                if level > len(os.listdir("level")):
+                if game_world.on_last_level:
                     mode = ScreenMode.WIN
                 else:
+                    level = game_world.next_level
                     mode = ScreenMode.SHOP
                     loaded = False
 
         # Handles when the player has won the game
         elif mode == ScreenMode.WIN:
-            destroyLevel((Drawables, playerGroup, Collidables, Platforms))
+            Level.destroy(Drawables, playerGroup, Collidables, Platforms)
             game_win()
             if pygame.K_RETURN in inputs["key"]:
                 mode = ScreenMode.MAIN

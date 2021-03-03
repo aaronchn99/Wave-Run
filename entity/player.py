@@ -1,5 +1,6 @@
 from var.variables import *
-from .Sprites import Character
+from .Sprites import Character, Obstacle, Enemy
+from .wave import Tsunami
 
 def update_controls(left, right, jump):
     global left_key
@@ -358,7 +359,8 @@ class playerClass(Character):
                 self.image.set_alpha(255)
             noDamageGroup = collidables.copy()
             for sprite in noDamageGroup:
-                if type(sprite).__name__ in ("Obstacle", "Enemy"):
+                if (isinstance(sprite, Obstacle) and not isinstance(sprite, Tsunami)) \
+                        or isinstance(sprite, Enemy):
                     noDamageGroup.remove(sprite)
             collide_list = self.collide_trigger(noDamageGroup, playerGroup)
             self._invincible_time -= Clock.get_time()
@@ -370,7 +372,7 @@ class playerClass(Character):
         if self._noclip:
             waveGroup = pygame.sprite.Group()
             for sprite in collidables:
-                if type(sprite).__name__ == "Tsunami":
+                if isinstance(sprite, Tsunami):
                     waveGroup.add(sprite)
             collide_list = self.collide_trigger(waveGroup, playerGroup)
         if self._transparent:

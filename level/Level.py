@@ -6,6 +6,8 @@ from entity.non_player import *
 
 from images.Image import crop
 
+from var.variables import Effect
+
 # Load spritesheets (TODO: Temporary, to be replaced by loader in Level/World class)
 rootdir = os.path.dirname(os.path.dirname(__file__))
 EntitySheet = pygame.image.load(os.path.join(rootdir, "images\\ItemObstacles.png"))
@@ -15,6 +17,13 @@ coin_frames = []
 for i in range(8):
     coin_frames.append(crop(CoinSheet, (40*i, 0), (40, 40)))
 
+# String to Effect mapping
+effect_map = {
+    "FAST": Effect.FAST,
+    "SLOW": Effect.SLOW,
+    "KNOCKOUT": Effect.KNOCKOUT,
+    "DIZZY": Effect.DIZZY,
+}
 
 # Maintains level data (e.g. level size, platform and sprite info)
 # Used to build level
@@ -67,7 +76,7 @@ class Level:
             sprite["name"] = str(sprite["x"])+"-"+str(sprite["y"])
             for field in d_i["fieldInstances"]:
                 if field["__identifier"] == "effect_types":
-                    effect_types = field["__value"]
+                    effect_types = list(map(lambda x: effect_map[x], field["__value"]))
                 elif field["__identifier"] == "effect_amounts":
                     effect_amounts = field["__value"]
                 elif field["__identifier"] == "effect_durations":

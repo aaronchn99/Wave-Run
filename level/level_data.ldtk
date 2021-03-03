@@ -259,11 +259,11 @@
 					"editorDisplayPos": "Above",
 					"editorAlwaysShow": false,
 					"editorCutLongValues": true,
-					"min": null,
+					"min": 1,
 					"max": null,
 					"regex": null,
 					"acceptFileTypes": null,
-					"defaultOverride": null,
+					"defaultOverride": { "id": "V_Int", "params": [1000] },
 					"textLangageMode": null
 				},
 				{
@@ -279,11 +279,11 @@
 					"editorDisplayPos": "Above",
 					"editorAlwaysShow": false,
 					"editorCutLongValues": true,
-					"min": null,
+					"min": 1,
 					"max": null,
 					"regex": null,
 					"acceptFileTypes": null,
-					"defaultOverride": null,
+					"defaultOverride": { "id": "V_Int", "params": [1000] },
 					"textLangageMode": null
 				},
 				{
@@ -299,11 +299,11 @@
 					"editorDisplayPos": "Above",
 					"editorAlwaysShow": false,
 					"editorCutLongValues": true,
-					"min": null,
+					"min": 1,
 					"max": null,
 					"regex": null,
 					"acceptFileTypes": null,
-					"defaultOverride": null,
+					"defaultOverride": { "id": "V_Int", "params": [1] },
 					"textLangageMode": null
 				},
 				{
@@ -425,11 +425,11 @@
 					"editorDisplayPos": "Above",
 					"editorAlwaysShow": false,
 					"editorCutLongValues": true,
-					"min": null,
+					"min": 1,
 					"max": null,
 					"regex": null,
 					"acceptFileTypes": null,
-					"defaultOverride": null,
+					"defaultOverride": { "id": "V_Int", "params": [1000] },
 					"textLangageMode": null
 				},
 				{
@@ -445,11 +445,11 @@
 					"editorDisplayPos": "Above",
 					"editorAlwaysShow": false,
 					"editorCutLongValues": true,
-					"min": null,
+					"min": 1,
 					"max": null,
 					"regex": null,
 					"acceptFileTypes": null,
-					"defaultOverride": null,
+					"defaultOverride": { "id": "V_Int", "params": [1] },
 					"textLangageMode": null
 				},
 				{

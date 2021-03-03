@@ -87,28 +87,6 @@
 			"gridTiles": [],
 			"entityInstances": [
 				{
-					"__identifier": "Parrot",
-					"__grid": [2,17],
-					"__pivot": [0,0],
-					"__tile": null,
-					"width": 24,
-					"height": 24,
-					"defUid": 50,
-					"px": [51,352],
-					"fieldInstances": []
-				},
-				{
-					"__identifier": "Redcoat",
-					"__grid": [10,17],
-					"__pivot": [0,0],
-					"__tile": null,
-					"width": 32,
-					"height": 48,
-					"defUid": 49,
-					"px": [205,352],
-					"fieldInstances": []
-				},
-				{
 					"__identifier": "Skeleton",
 					"__grid": [8,11],
 					"__pivot": [0,0],
@@ -117,17 +95,6 @@
 					"height": 48,
 					"defUid": 35,
 					"px": [162,232],
-					"fieldInstances": []
-				},
-				{
-					"__identifier": "Pirate",
-					"__grid": [30,10],
-					"__pivot": [0,0],
-					"__tile": null,
-					"width": 32,
-					"height": 48,
-					"defUid": 51,
-					"px": [601,212],
 					"fieldInstances": []
 				},
 				{
@@ -395,39 +362,6 @@
 					"fieldInstances": []
 				},
 				{
-					"__identifier": "Anchor",
-					"__grid": [31,18],
-					"__pivot": [0,0],
-					"__tile": { "tilesetUid": 12, "srcRect": [0,80,40,40] },
-					"width": 40,
-					"height": 40,
-					"defUid": 34,
-					"px": [620,360],
-					"fieldInstances": []
-				},
-				{
-					"__identifier": "Barrel",
-					"__grid": [38,18],
-					"__pivot": [0,0],
-					"__tile": { "tilesetUid": 12, "srcRect": [40,80,40,40] },
-					"width": 40,
-					"height": 40,
-					"defUid": 44,
-					"px": [760,360],
-					"fieldInstances": []
-				},
-				{
-					"__identifier": "Crate",
-					"__grid": [35,18],
-					"__pivot": [0,0],
-					"__tile": { "tilesetUid": 12, "srcRect": [80,80,40,40] },
-					"width": 40,
-					"height": 40,
-					"defUid": 45,
-					"px": [700,360],
-					"fieldInstances": []
-				},
-				{
 					"__identifier": "Horse",
 					"__grid": [5,17],
 					"__pivot": [0,0],
@@ -448,32 +382,207 @@
 					"defUid": 46,
 					"px": [860,360],
 					"fieldInstances": [
-						{ "__identifier": "wait_time", "__value": 0, "__type": "Int", "defUid": 58, "realEditorValues": [] },
-						{ "__identifier": "sail_time", "__value": 0, "__type": "Int", "defUid": 59, "realEditorValues": [] },
-						{ "__identifier": "speed", "__value": 0, "__type": "Int", "defUid": 62, "realEditorValues": [] },
+						{
+							"__identifier": "wait_time",
+							"__value": 5000,
+							"__type": "Int",
+							"defUid": 58,
+							"realEditorValues": [{ "id": "V_Int", "params": [5000] }]
+						},
+						{ "__identifier": "sail_time", "__value": 1000, "__type": "Int", "defUid": 59, "realEditorValues": [] },
+						{
+							"__identifier": "speed",
+							"__value": 1000,
+							"__type": "Int",
+							"defUid": 62,
+							"realEditorValues": [{ "id": "V_Int", "params": [1000] }]
+						},
 						{ "__identifier": "points", "__value": 0, "__type": "Int", "defUid": 66, "realEditorValues": [] },
-						{ "__identifier": "effect_types", "__value": [], "__type": "Array<LocalEnum.Effect_type>", "defUid": 69, "realEditorValues": [] },
-						{ "__identifier": "effect_amounts", "__value": [], "__type": "Array<Int>", "defUid": 70, "realEditorValues": [] },
-						{ "__identifier": "effect_durations", "__value": [], "__type": "Array<Int>", "defUid": 71, "realEditorValues": [] }
+						{
+							"__identifier": "effect_types",
+							"__value": ["FAST"],
+							"__type": "Array<LocalEnum.Effect_type>",
+							"defUid": 69,
+							"realEditorValues": [{
+								"id": "V_String",
+								"params": ["FAST"]
+							}]
+						},
+						{
+							"__identifier": "effect_amounts",
+							"__value": [20000],
+							"__type": "Array<Int>",
+							"defUid": 70,
+							"realEditorValues": [{ "id": "V_Int", "params": [20000] }]
+						},
+						{
+							"__identifier": "effect_durations",
+							"__value": [10000],
+							"__type": "Array<Int>",
+							"defUid": 71,
+							"realEditorValues": [{ "id": "V_Int", "params": [10000] }]
+						}
 					]
 				},
 				{
 					"__identifier": "Cannon",
-					"__grid": [35,11],
+					"__grid": [86,13],
 					"__pivot": [0,0],
 					"__tile": { "tilesetUid": 24, "srcRect": [260,0,65,65] },
 					"width": 40,
 					"height": 40,
 					"defUid": 47,
-					"px": [700,220],
+					"px": [1720,260],
 					"fieldInstances": [
-						{ "__identifier": "fuse_time", "__value": 0, "__type": "Int", "defUid": 60, "realEditorValues": [] },
-						{ "__identifier": "speed", "__value": 0, "__type": "Int", "defUid": 61, "realEditorValues": [] },
-						{ "__identifier": "angle", "__value": 0, "__type": "Float", "defUid": 63, "realEditorValues": [] },
+						{
+							"__identifier": "fuse_time",
+							"__value": 10000,
+							"__type": "Int",
+							"defUid": 60,
+							"realEditorValues": [{ "id": "V_Int", "params": [10000] }]
+						},
+						{
+							"__identifier": "speed",
+							"__value": 2000,
+							"__type": "Int",
+							"defUid": 61,
+							"realEditorValues": [{ "id": "V_Int", "params": [2000] }]
+						},
+						{
+							"__identifier": "angle",
+							"__value": 160,
+							"__type": "Float",
+							"defUid": 63,
+							"realEditorValues": [{ "id": "V_Float", "params": [160] }]
+						},
 						{ "__identifier": "points", "__value": 0, "__type": "Int", "defUid": 67, "realEditorValues": [] },
 						{ "__identifier": "effect_types", "__value": [], "__type": "Array<LocalEnum.Effect_type>", "defUid": 72, "realEditorValues": [] },
 						{ "__identifier": "effect_amounts", "__value": [], "__type": "Array<Int>", "defUid": 73, "realEditorValues": [] },
 						{ "__identifier": "effect_durations", "__value": [], "__type": "Array<Int>", "defUid": 74, "realEditorValues": [] }
+					]
+				},
+				{
+					"__identifier": "Redcoat",
+					"__grid": [44,10],
+					"__pivot": [0,0],
+					"__tile": null,
+					"width": 32,
+					"height": 48,
+					"defUid": 49,
+					"px": [882,212],
+					"fieldInstances": []
+				},
+				{
+					"__identifier": "Crate",
+					"__grid": [66,18],
+					"__pivot": [0,0],
+					"__tile": { "tilesetUid": 12, "srcRect": [80,80,40,40] },
+					"width": 40,
+					"height": 40,
+					"defUid": 45,
+					"px": [1320,360],
+					"fieldInstances": []
+				},
+				{
+					"__identifier": "Anchor",
+					"__grid": [59,18],
+					"__pivot": [0,0],
+					"__tile": { "tilesetUid": 12, "srcRect": [0,80,40,40] },
+					"width": 40,
+					"height": 40,
+					"defUid": 34,
+					"px": [1180,360],
+					"fieldInstances": []
+				},
+				{
+					"__identifier": "Barrel",
+					"__grid": [32,18],
+					"__pivot": [0,0],
+					"__tile": { "tilesetUid": 12, "srcRect": [40,80,40,40] },
+					"width": 40,
+					"height": 40,
+					"defUid": 44,
+					"px": [640,360],
+					"fieldInstances": []
+				},
+				{
+					"__identifier": "Parrot",
+					"__grid": [22,12],
+					"__pivot": [0,0],
+					"__tile": null,
+					"width": 24,
+					"height": 24,
+					"defUid": 50,
+					"px": [440,240],
+					"fieldInstances": []
+				},
+				{
+					"__identifier": "Pirate",
+					"__grid": [30,10],
+					"__pivot": [0,0],
+					"__tile": null,
+					"width": 32,
+					"height": 48,
+					"defUid": 51,
+					"px": [601,212],
+					"fieldInstances": []
+				},
+				{
+					"__identifier": "Cannon",
+					"__grid": [103,18],
+					"__pivot": [0,0],
+					"__tile": { "tilesetUid": 24, "srcRect": [260,0,65,65] },
+					"width": 40,
+					"height": 40,
+					"defUid": 47,
+					"px": [2060,360],
+					"fieldInstances": [
+						{
+							"__identifier": "fuse_time",
+							"__value": 10000,
+							"__type": "Int",
+							"defUid": 60,
+							"realEditorValues": [{ "id": "V_Int", "params": [10000] }]
+						},
+						{
+							"__identifier": "speed",
+							"__value": 2000,
+							"__type": "Int",
+							"defUid": 61,
+							"realEditorValues": [{ "id": "V_Int", "params": [2000] }]
+						},
+						{
+							"__identifier": "angle",
+							"__value": 85,
+							"__type": "Float",
+							"defUid": 63,
+							"realEditorValues": [{ "id": "V_Float", "params": [85] }]
+						},
+						{ "__identifier": "points", "__value": 0, "__type": "Int", "defUid": 67, "realEditorValues": [] },
+						{
+							"__identifier": "effect_types",
+							"__value": ["SLOW"],
+							"__type": "Array<LocalEnum.Effect_type>",
+							"defUid": 72,
+							"realEditorValues": [{
+								"id": "V_String",
+								"params": ["SLOW"]
+							}]
+						},
+						{
+							"__identifier": "effect_amounts",
+							"__value": [500],
+							"__type": "Array<Int>",
+							"defUid": 73,
+							"realEditorValues": [{ "id": "V_Int", "params": [500] }]
+						},
+						{
+							"__identifier": "effect_durations",
+							"__value": [5000],
+							"__type": "Array<Int>",
+							"defUid": 74,
+							"realEditorValues": [{ "id": "V_Int", "params": [5000] }]
+						}
 					]
 				}
 			]

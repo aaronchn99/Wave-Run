@@ -547,9 +547,9 @@
 					"defUid": 46,
 					"px": [2380,460],
 					"fieldInstances": [
-						{ "__identifier": "wait_time", "__value": 0, "__type": "Int", "defUid": 58, "realEditorValues": [] },
-						{ "__identifier": "sail_time", "__value": 0, "__type": "Int", "defUid": 59, "realEditorValues": [] },
-						{ "__identifier": "speed", "__value": 0, "__type": "Int", "defUid": 62, "realEditorValues": [] },
+						{ "__identifier": "wait_time", "__value": 1000, "__type": "Int", "defUid": 58, "realEditorValues": [] },
+						{ "__identifier": "sail_time", "__value": 1000, "__type": "Int", "defUid": 59, "realEditorValues": [] },
+						{ "__identifier": "speed", "__value": 1, "__type": "Int", "defUid": 62, "realEditorValues": [] },
 						{ "__identifier": "points", "__value": 0, "__type": "Int", "defUid": 66, "realEditorValues": [] },
 						{ "__identifier": "effect_types", "__value": [], "__type": "Array<LocalEnum.Effect_type>", "defUid": 69, "realEditorValues": [] },
 						{ "__identifier": "effect_amounts", "__value": [], "__type": "Array<Int>", "defUid": 70, "realEditorValues": [] },
@@ -566,8 +566,8 @@
 					"defUid": 47,
 					"px": [2420,260],
 					"fieldInstances": [
-						{ "__identifier": "fuse_time", "__value": 0, "__type": "Int", "defUid": 60, "realEditorValues": [] },
-						{ "__identifier": "speed", "__value": 0, "__type": "Int", "defUid": 61, "realEditorValues": [] },
+						{ "__identifier": "fuse_time", "__value": 1000, "__type": "Int", "defUid": 60, "realEditorValues": [] },
+						{ "__identifier": "speed", "__value": 1, "__type": "Int", "defUid": 61, "realEditorValues": [] },
 						{ "__identifier": "angle", "__value": 0, "__type": "Float", "defUid": 63, "realEditorValues": [] },
 						{ "__identifier": "points", "__value": 0, "__type": "Int", "defUid": 67, "realEditorValues": [] },
 						{

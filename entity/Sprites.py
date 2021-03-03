@@ -26,7 +26,10 @@ class Entity(pygame.sprite.Sprite):
             self.image.fill(color)
             self._render_mode = "color"
         elif frames != None:
-            self._frames = list(map(lambda f: f.convert_alpha(), frames))
+            self._frames = list(map(
+                lambda f: pygame.transform.scale(f.convert_alpha(), (self._w, self._h)),
+                frames
+            ))
             self._animate_fps = fps
             self._current_frame = current_frame
             self.image = frames[current_frame]
