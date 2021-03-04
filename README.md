@@ -22,5 +22,5 @@ A 2D side scroller running game, with a pirate theme. The aim of the game is to 
 - [ ] Progress saving
 - [ ] Scoreboard and stats screen and database
 - [ ] How to play screen
-- [ ] Level generator/editor
+- [x] Level generator/editor
 - [ ] Sprite Design

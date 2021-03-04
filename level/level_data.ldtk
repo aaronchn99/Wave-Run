@@ -9,7 +9,7 @@
 		"url": "https://ldtk.io"
 	},
 	"jsonVersion": "0.8.1",
-	"nextUid": 80,
+	"nextUid": 81,
 	"worldLayout": "Free",
 	"worldGridWidth": 256,
 	"worldGridHeight": 256,
@@ -724,9 +724,9 @@
 			"color": "#00BB54",
 			"renderMode": "Tile",
 			"showName": false,
-			"tilesetId": 12,
+			"tilesetId": 80,
 			"tileId": 0,
-			"tileRenderMode": "Stretch",
+			"tileRenderMode": "Cover",
 			"maxCount": 0,
 			"limitScope": "PerLevel",
 			"limitBehavior": "MoveLastOne",
@@ -894,6 +894,18 @@
 			"padding": 0,
 			"savedSelections": [],
 			"cachedPixelData": { "opaqueTiles": "0", "averageColors": "6643" }
+		},
+		{
+			"identifier": "Coin",
+			"uid": 80,
+			"relPath": "../images/Coin.png",
+			"pxWid": 160,
+			"pxHei": 20,
+			"tileGridSize": 20,
+			"spacing": 0,
+			"padding": 0,
+			"savedSelections": [],
+			"cachedPixelData": { "opaqueTiles": "00000000", "averageColors": "cdb0adb08db06db03db06db08db0adb0" }
 		}
 	], "enums": [{ "identifier": "Effect_type", "uid": 68, "values": [
 		{ "id": "FAST", "tileId": 0, "__tileSrcRect": [0,0,65,65] },

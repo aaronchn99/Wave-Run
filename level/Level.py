@@ -15,7 +15,7 @@ CoinSheet = pygame.image.load(os.path.join(rootdir, "images\\Coin.png"))
 # Crop and arrange each frame of coin sprite
 coin_frames = []
 for i in range(8):
-    coin_frames.append(crop(CoinSheet, (40*i, 0), (40, 40)))
+    coin_frames.append(crop(CoinSheet, (20*i, 0), (20, 20)))
 
 # String to Effect mapping
 effect_map = {

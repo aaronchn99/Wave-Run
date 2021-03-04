@@ -260,6 +260,7 @@ def lvl_clear(inputs):
     # Draw HUD
     Hud.draw_hud(Frame)
     playerSprite.update({"key": [right_key]}, (), Platforms, playerGroup)
+    Wave.update([], playerSprite)
     winText = headerFont.render("Level Clear", False, GREEN)
     continueText = subFont.render("Press any key to continue", False, GREEN)
     pos = winText.get_rect(center=(int(native_res[0] / 2), int(native_res[1] / 2))).topleft
