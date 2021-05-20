@@ -1,10 +1,10 @@
-import json, pygame, enum, os
+import json, pygame, enum, os, copy
 
 from entity.wave import Tsunami
 from entity.platforms import Platform
 from entity.non_player import *
 
-from images.Image import crop
+from images.Image import *
 
 from var.variables import Effect
 
@@ -13,9 +13,9 @@ rootdir = os.path.dirname(os.path.dirname(__file__))
 EntitySheet = pygame.image.load(os.path.join(rootdir, "images\\ItemObstacles.png"))
 CoinSheet = pygame.image.load(os.path.join(rootdir, "images\\Coin.png"))
 # Crop and arrange each frame of coin sprite
-coin_frames = []
-for i in range(8):
-    coin_frames.append(crop(CoinSheet, (20*i, 0), (20, 20)))
+# coin_frames = []
+# for i in range(8):
+#     coin_frames.append(crop(CoinSheet, (20*i, 0), (20, 20)))
 
 # String to Effect mapping
 effect_map = {
@@ -159,7 +159,7 @@ class Level:
             # Item Sprites
             if sprite_d["type"] == "Coin":
                 Sprite = Coin(**sprite_d,
-                    frames=coin_frames, fps=8)
+                    animation=Animation(os.path.join(rootdir, "images\\Coin.png"), 8, (20,20), 8))
             elif sprite_d["type"] == "Treasure":
                 Sprite = Treasure(**sprite_d,
                     image=crop(EntitySheet, (40, 0), (40, 40)))

@@ -7,7 +7,7 @@ hitbox_mode = 0
 # Base class for all in game sprites, inherited from Sprite from Pygame
 class Entity(pygame.sprite.Sprite):
     # The class constructor. Takes the sprite name, position, dimensions and fill colour
-    def __init__(self, name, x, y, width, height, color=None, image=None, frames=None, fps=1, current_frame=0):
+    def __init__(self, name, x, y, width, height, color=None, image=None, animation=None):
         # Calls the superclass' constructor (i.e. Sprite class)
         super().__init__()
         # Positional and dimensional attributes
@@ -25,14 +25,9 @@ class Entity(pygame.sprite.Sprite):
             self.image = pygame.Surface((self._w, self._h), flags=pygame.SRCALPHA)
             self.image.fill(color)
             self._render_mode = "color"
-        elif frames != None:
-            self._frames = list(map(
-                lambda f: pygame.transform.scale(f.convert_alpha(), (self._w, self._h)),
-                frames
-            ))
-            self._animate_fps = fps
-            self._current_frame = current_frame
-            self.image = frames[current_frame]
+        elif animation != None:
+            self._animation = animation
+            self.image = self._animation.frames[0]
             self._render_mode = "animate"
         else:
             self.image = pygame.Surface((self._w, self._h), flags=pygame.SRCALPHA)
@@ -77,10 +72,7 @@ class Entity(pygame.sprite.Sprite):
 
     # Animates the entity by changing the current frame (Does not draw the frame)
     def animate(self):
-        self._current_frame += self._animate_fps * Clock.get_time()/1000
-        if self._current_frame >= len(self._frames):
-            self._current_frame = 0
-        self.image = self._frames[int(self._current_frame)]
+        self.image = self._animation.next_frame(Clock.get_time())
 
     # Returns the rendering mode (color/image/animate/black)
     def get_render_mode(self):
@@ -95,9 +87,9 @@ class Entity(pygame.sprite.Sprite):
 # that is applied to the player upon collision. Inherits the Entity class.
 class Item(Entity):
     # Class constructor
-    def __init__(self, name, x, y, width, height, points, effects = (), color=None, image=None, frames=None, fps=1, current_frame=0):
+    def __init__(self, name, x, y, width, height, points, effects = (), color=None, image=None, animation=None):
         # Calls superclass' constructor
-        super().__init__(name, x, y, width, height, color, image, frames, fps, current_frame)
+        super().__init__(name, x, y, width, height, color, image, animation)
         # Private attribute for points that the player collects upon picking this item up
         self._points = points
         # Effect list is a list of 3 element arrays in this form: [type, amount, duration]
@@ -156,8 +148,8 @@ class Item(Entity):
 # Item which required more than adding an effect to the player
 class SpecialItem(Item):
     # Class constructor
-    def __init__(self, name, x, y, width, height, points, life_time, effects = (), color=None, image=None, frames=None, fps=1, current_frame=0):
-        super().__init__(name, x, y, width, height, points, effects, color, image, frames, fps, current_frame)
+    def __init__(self, name, x, y, width, height, points, life_time, effects = (), color=None, image=None, animation=None):
+        super().__init__(name, x, y, width, height, points, effects, color, image, animation)
         self._life_time = life_time
         self._start_life_time = life_time
         if self._render_mode != "animate":
@@ -176,8 +168,8 @@ class SpecialItem(Item):
 # Class for obstacle sprites.
 class Obstacle(Entity):
     # Class constructor
-    def __init__(self, name, x, y, width, height, damage, lost_points, knockout_time, color=None, image=None, frames=None, fps=1, current_frame=0):
-        super().__init__(name, x, y, width, height, color, image, frames, fps, current_frame)
+    def __init__(self, name, x, y, width, height, damage, lost_points, knockout_time, color=None, image=None, animation=None):
+        super().__init__(name, x, y, width, height, color, image, animation)
         # The damage inflicted on the player upon collision.
         self._damage = damage
         # Points the player loses upon collision.

@@ -23,19 +23,23 @@ class Animation:
         self.w, self.h = frame_dim
         self._fps = fps
         self._animation_ended = False
-        self._animation_i = 0
+        self._progress = 0
     
+    @property
+    def frames(self):
+        return self._frames
+
     # Returns next frame depending on time passed and fps
     # Params:
     # time_delta - Time passed since last tick (milliseconds)
     def next_frame(self, time_delta):
-        self._animation_i += int(self._fps * time_delta/1000)
-        if self._animation_i > len(self._frames) - 1:
+        self._progress += self._fps * time_delta/1000
+        if self._progress >= len(self._frames):
             self._animation_ended = True
-            self._animation_i %= len(self._frames)
+            self._progress %= len(self._frames)
         elif self._animation_ended:
             self._animation_ended = False
-        return self._frames[self._animation_i]
+        return self._frames[int(self._progress)]
 
     # If animation has reached its last frame
     @property
@@ -44,4 +48,4 @@ class Animation:
     
     # Set animation index (animation_i) back to start
     def reset(self):
-        self._animation_i = 0
+        self._progress = 0

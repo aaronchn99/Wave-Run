@@ -9,54 +9,54 @@ from .Sprites import Item, Obstacle, SpecialItem, Enemy, Entity
 class Coin(Item):
     def __init__(self, name, x, y, width, height, \
         increasers=(1,1), decreasers=(1,1), \
-        color=None, image=None, frames=None, fps=1, current_frame=0,
+        color=None, image=None, animation=None,
         **kwargs):
         super().__init__(name, x, y, width, height, rand.randint(5, 20), \
-            [Effect.MONEY, 1, 0], color, image, frames, fps, current_frame)
+            [Effect.MONEY, 1, 0], color, image, animation)
 
 
 # Treasure Chests, awards player 20 Gold and between 25-50 points
 class Treasure(Item):
     def __init__(self, name, x, y, width, height, \
         increasers=(1,1), decreasers=(1,1), \
-        color=None, image=None, frames=None, fps=1, current_frame=0,
+        color=None, image=None, animation=None,
         **kwargs):
         super().__init__(name, x, y, width, height, rand.randint(25, 50), \
-            [Effect.MONEY, 20, 0], color, image, frames, fps, current_frame)
+            [Effect.MONEY, 20, 0], color, image, animation)
 
 
 # Bandage item, heals player by 1 hp (Half heart)
 class Bandage(Item):
     def __init__(self, name, x, y, width, height, \
         increasers=(1,1), decreasers=(1,1), \
-        color=None, image=None, frames=None, fps=1, current_frame=0,
+        color=None, image=None, animation=None,
         **kwargs):
         super().__init__(name, x, y, width, height, 0, \
-            [Effect.HEALTH, 1, 0], color, image, frames, fps, current_frame)
+            [Effect.HEALTH, 1, 0], color, image, animation)
 
 
 # Medical Chest, heals player to maximum hp
 class Medkit(Item):
     def __init__(self, name, x, y, width, height, \
         increasers=(1,1), decreasers=(1,1), \
-        color=None, image=None, frames=None, fps=1, current_frame=0,
+        color=None, image=None, animation=None,
         **kwargs):
         super().__init__(name, x, y, width, height, 0, \
-            [Effect.HEALTH, 999, 0], color, image, frames, fps, current_frame)
+            [Effect.HEALTH, 999, 0], color, image, animation)
 
 
 # Crate of Rum, awards 50-100 points and heals 2 hp, but slows player down
 class Rum(Item):
     def __init__(self, name, x, y, width, height, \
         increasers=(1,1), decreasers=(1,1), \
-        color=None, image=None, frames=None, fps=1, current_frame=0,
+        color=None, image=None, animation=None,
         **kwargs):
         effects = [
             [Effect.HEALTH, 2, 0],
             [Effect.SLOW, 150, round(10000*increasers[0]*increasers[1])]
         ]
         super().__init__(name, x, y, width, height, rand.randint(50, 100), \
-            effects, color, image, frames, fps, current_frame)
+            effects, color, image, animation)
 
 Item.subclass_map = {
     "Coin": Coin,
@@ -73,13 +73,13 @@ Item.subclass_map = {
 class Anchor(Obstacle):
     def __init__(self, name, x, y, width, height, \
         increasers=(1,1), decreasers=(1,1), \
-        color=None, image=None, frames=None, fps=1, current_frame=0,
+        color=None, image=None, animation=None,
         **kwargs):
         damage = round(1 * increasers[0] * increasers[1])
         lost_points = 200
         knockout_time = round(4000 * increasers[0] * increasers[1])
         super().__init__(name, x, y, width, height, damage, lost_points, knockout_time, \
-            color, image, frames, fps, current_frame)
+            color, image, animation)
 
 
 # Barrel Obstacle, 1 hp damage, takes 200 points and 3 seconds knockout
@@ -87,13 +87,13 @@ class Anchor(Obstacle):
 class Barrel(Obstacle):
     def __init__(self, name, x, y, width, height, \
         increasers=(1,1), decreasers=(1,1), \
-        color=None, image=None, frames=None, fps=1, current_frame=0,
+        color=None, image=None, animation=None,
         **kwargs):
         damage = round(1 * increasers[0] * increasers[1])
         lost_points = 200
         knockout_time = round(3000 * increasers[0] * increasers[1])
         super().__init__(name, x, y, width, height, damage, lost_points, knockout_time, \
-            color, image, frames, fps, current_frame)
+            color, image, animation)
 
 
 # Crate Obstacle, 1 hp damage, 200 points taken and 2 second knockout
@@ -101,13 +101,13 @@ class Barrel(Obstacle):
 class Crate(Obstacle):
     def __init__(self, name, x, y, width, height, \
         increasers=(1,1), decreasers=(1,1), \
-        color=None, image=None, frames=None, fps=1, current_frame=0,
+        color=None, image=None, animation=None,
         **kwargs):
         damage = round(1 * increasers[0] * increasers[1])
         lost_points = 200
         knockout_time = round(2000 * increasers[0] * increasers[1])
         super().__init__(name, x, y, width, height, damage, lost_points, knockout_time, \
-            color, image, frames, fps, current_frame)
+            color, image, animation)
 
 
 ''' Subclasses for each type of SpecialItem '''
@@ -116,27 +116,25 @@ class ShipDock(SpecialItem):
     # Class constructor
     def __init__(self, name, x, y, width, height, points, wait_time, sail_time, speed,
             increasers=(1,1), decreasers=(1,1), effects = (),
-            dock_color=None, dock_image=None, dock_frames=None, dock_fps=1, dock_current_frame=0,
-            ship_w=0, ship_h=0, ship_color=None, ship_image=None, ship_frames=None, ship_fps=1, ship_current_frame=0,
+            dock_color=None, dock_image=None, dock_animation=None,
+            ship_w=0, ship_h=0, ship_color=None, ship_image=None, ship_animation=None,
             **kwargs):
         # Waiting and Sailing duration reduced by difficulty decreasers
         wait_time = round(wait_time * decreasers[0] * decreasers[1])
         sail_time = round(sail_time * decreasers[0] * decreasers[1])
-        super().__init__(name, x, y, width, height, points, wait_time, effects, dock_color, dock_image, dock_frames,
-                         dock_fps, dock_current_frame)
+        super().__init__(name, x, y, width, height, points, wait_time, effects, dock_color, dock_image, dock_animation)
         self._sailing = False
         self._sail_time = sail_time
         self._speed = speed
         if ship_image != None:
             ship_w = ship_image.get_width()
             ship_h = ship_image.get_height()
-        elif ship_frames != None:
-            frame = ship_frames[0]
+        elif ship_animation != None:
+            frame = ship_animation.frames[0]
             ship_w = frame.get_width()
             ship_h = frame.get_height()
         ship_x = x - (ship_w/2) + (width/2)
-        self._shipEntity = Entity(name + "Ship", ship_x, 0, ship_w, ship_h, ship_color, ship_image, ship_frames,
-                                  ship_fps, ship_current_frame)
+        self._shipEntity = Entity(name + "Ship", ship_x, 0, ship_w, ship_h, ship_color, ship_image, ship_animation)
         self._ship_alive = True
         self.effects = effects
 
@@ -251,12 +249,12 @@ class Cannon(SpecialItem):
     # Class constructor
     def __init__(self, name, x, y, width, height, points, fuse_time, speed, angle,
             increasers=(1,1), decreasers=(1,1), effects = (),
-            color=None, image=None, frames=None, fps=1, current_frame=0,
+            color=None, image=None, animation=None,
             **kwargs):
         # Fuse duration and speed reduced by difficulty decreasers
         fuse_time = round(fuse_time * decreasers[0] * decreasers[1])
         speed = round(speed * decreasers[0] * decreasers[1])
-        super().__init__(name, x, y, width, height, points, fuse_time, effects, color, image, frames, fps, current_frame)
+        super().__init__(name, x, y, width, height, points, fuse_time, effects, color, image, animation)
         self._speed = speed
         self._angle = (angle/360) * (2*math.pi)
         self._player_flying = False
@@ -318,12 +316,12 @@ class Cannon(SpecialItem):
 class Horse(SpecialItem):
     def __init__(self, name, x, y, width, height, points, \
         increasers=(1,1), decreasers=(1,1), \
-        color=None, image=None, frames=None, fps=1, current_frame=0,
+        color=None, image=None, animation=None,
         **kwargs):
         life_time = 0
         effects = [Effect.FAST, 240, round(15000*decreasers[0]*decreasers[1])]
         super().__init__(name, x, y, width, height, points, life_time, effects, \
-            color, image, frames, fps, current_frame)
+            color, image, animation)
 
 
 ''' Subclasses for each type of Enemy '''
@@ -331,7 +329,7 @@ class Horse(SpecialItem):
 class Pirate(Enemy):
     def __init__(self, name, x, y, width, height,
         increasers=(1,1), decreasers=(1,1),
-        color=None, image=None, frames=None, fps=1, current_frame=0,
+        color=None, image=None, animation=None,
         **kwargs):
         health, strength, armor, damage, win_points, lose_points = 3, 2, 0.4, 2, 100, 300
         color=(0,0,0)
@@ -341,7 +339,7 @@ class Pirate(Enemy):
 class Redcoat(Enemy):
     def __init__(self, name, x, y, width, height,
         increasers=(1,1), decreasers=(1,1),
-        color=None, image=None, frames=None, fps=1, current_frame=0,
+        color=None, image=None, animation=None,
         **kwargs):
         health, strength, armor, damage, win_points, lose_points = 3, 2, 0.4, 2, 100, 300
         color=(255,0,0)
@@ -351,7 +349,7 @@ class Redcoat(Enemy):
 class Parrot(Enemy):
     def __init__(self, name, x, y, width, height,
         increasers=(1,1), decreasers=(1,1),
-        color=None, image=None, frames=None, fps=1, current_frame=0,
+        color=None, image=None, animation=None,
         **kwargs):
         health, strength, armor, damage, win_points, lose_points = 3, 2, 0.4, 2, 100, 300
         color=(0,255,0)
@@ -361,7 +359,7 @@ class Parrot(Enemy):
 class Skeleton(Enemy):
     def __init__(self, name, x, y, width, height,
         increasers=(1,1), decreasers=(1,1),
-        color=None, image=None, frames=None, fps=1, current_frame=0,
+        color=None, image=None, animation=None,
         **kwargs):
         health, strength, armor, damage, win_points, lose_points = 3, 2, 0.4, 2, 100, 300
         color=(255,255,255)
