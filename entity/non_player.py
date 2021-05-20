@@ -7,56 +7,51 @@ from .Sprites import Item, Obstacle, SpecialItem, Enemy, Entity
 ''' Subclasses for each type of Item '''
 # Coin sprites, awarding the player 1 Gold and between 5-20 points
 class Coin(Item):
-    def __init__(self, name, x, y, width, height, \
+    def __init__(self, name, x, y, width, height, texture, \
         increasers=(1,1), decreasers=(1,1), \
-        color=None, image=None, animation=None,
         **kwargs):
-        super().__init__(name, x, y, width, height, rand.randint(5, 20), \
-            [Effect.MONEY, 1, 0], color, image, animation)
+        super().__init__(name, x, y, width, height, texture, rand.randint(5, 20), \
+            [Effect.MONEY, 1, 0])
 
 
 # Treasure Chests, awards player 20 Gold and between 25-50 points
 class Treasure(Item):
-    def __init__(self, name, x, y, width, height, \
+    def __init__(self, name, x, y, width, height, texture, \
         increasers=(1,1), decreasers=(1,1), \
-        color=None, image=None, animation=None,
         **kwargs):
-        super().__init__(name, x, y, width, height, rand.randint(25, 50), \
-            [Effect.MONEY, 20, 0], color, image, animation)
+        super().__init__(name, x, y, width, height, texture, rand.randint(25, 50), \
+            [Effect.MONEY, 20, 0])
 
 
 # Bandage item, heals player by 1 hp (Half heart)
 class Bandage(Item):
-    def __init__(self, name, x, y, width, height, \
+    def __init__(self, name, x, y, width, height, texture, \
         increasers=(1,1), decreasers=(1,1), \
-        color=None, image=None, animation=None,
         **kwargs):
-        super().__init__(name, x, y, width, height, 0, \
-            [Effect.HEALTH, 1, 0], color, image, animation)
+        super().__init__(name, x, y, width, height, texture, 0, \
+            [Effect.HEALTH, 1, 0])
 
 
 # Medical Chest, heals player to maximum hp
 class Medkit(Item):
-    def __init__(self, name, x, y, width, height, \
+    def __init__(self, name, x, y, width, height, texture, \
         increasers=(1,1), decreasers=(1,1), \
-        color=None, image=None, animation=None,
         **kwargs):
-        super().__init__(name, x, y, width, height, 0, \
-            [Effect.HEALTH, 999, 0], color, image, animation)
+        super().__init__(name, x, y, width, height, texture, 0, \
+            [Effect.HEALTH, 999, 0])
 
 
 # Crate of Rum, awards 50-100 points and heals 2 hp, but slows player down
 class Rum(Item):
-    def __init__(self, name, x, y, width, height, \
+    def __init__(self, name, x, y, width, height, texture, \
         increasers=(1,1), decreasers=(1,1), \
-        color=None, image=None, animation=None,
         **kwargs):
         effects = [
             [Effect.HEALTH, 2, 0],
             [Effect.SLOW, 150, round(10000*increasers[0]*increasers[1])]
         ]
-        super().__init__(name, x, y, width, height, rand.randint(50, 100), \
-            effects, color, image, animation)
+        super().__init__(name, x, y, width, height, texture, rand.randint(50, 100), \
+            effects)
 
 Item.subclass_map = {
     "Coin": Coin,
@@ -71,70 +66,57 @@ Item.subclass_map = {
 # Anchor Obstacle, damages player by 1 hp, takes 200 points away and 
 # knockouts player for 4 seconds (damage and knockout adjusted by difficulty increasers)
 class Anchor(Obstacle):
-    def __init__(self, name, x, y, width, height, \
+    def __init__(self, name, x, y, width, height, texture, \
         increasers=(1,1), decreasers=(1,1), \
-        color=None, image=None, animation=None,
         **kwargs):
         damage = round(1 * increasers[0] * increasers[1])
         lost_points = 200
         knockout_time = round(4000 * increasers[0] * increasers[1])
-        super().__init__(name, x, y, width, height, damage, lost_points, knockout_time, \
-            color, image, animation)
+        super().__init__(name, x, y, width, height, texture, damage, lost_points, knockout_time)
 
 
 # Barrel Obstacle, 1 hp damage, takes 200 points and 3 seconds knockout
 # (Damage and knockout adjusted by difficulty increasers)
 class Barrel(Obstacle):
-    def __init__(self, name, x, y, width, height, \
+    def __init__(self, name, x, y, width, height, texture, \
         increasers=(1,1), decreasers=(1,1), \
-        color=None, image=None, animation=None,
         **kwargs):
         damage = round(1 * increasers[0] * increasers[1])
         lost_points = 200
         knockout_time = round(3000 * increasers[0] * increasers[1])
-        super().__init__(name, x, y, width, height, damage, lost_points, knockout_time, \
-            color, image, animation)
+        super().__init__(name, x, y, width, height, texture, damage, lost_points, knockout_time)
 
 
 # Crate Obstacle, 1 hp damage, 200 points taken and 2 second knockout
 # (Damage and knockout adjusted by difficulty increasers)
 class Crate(Obstacle):
-    def __init__(self, name, x, y, width, height, \
+    def __init__(self, name, x, y, width, height, texture, \
         increasers=(1,1), decreasers=(1,1), \
-        color=None, image=None, animation=None,
         **kwargs):
         damage = round(1 * increasers[0] * increasers[1])
         lost_points = 200
         knockout_time = round(2000 * increasers[0] * increasers[1])
-        super().__init__(name, x, y, width, height, damage, lost_points, knockout_time, \
-            color, image, animation)
+        super().__init__(name, x, y, width, height, texture, damage, lost_points, knockout_time)
 
 
 ''' Subclasses for each type of SpecialItem '''
 # Special Item which allows the player to move past a certain distance of the level
 class ShipDock(SpecialItem):
     # Class constructor
-    def __init__(self, name, x, y, width, height, points, wait_time, sail_time, speed,
+    def __init__(self, name, x, y, width, height, dock_texture, ship_texture,
+            points, wait_time, sail_time, speed,
             increasers=(1,1), decreasers=(1,1), effects = (),
-            dock_color=None, dock_image=None, dock_animation=None,
-            ship_w=0, ship_h=0, ship_color=None, ship_image=None, ship_animation=None,
             **kwargs):
         # Waiting and Sailing duration reduced by difficulty decreasers
         wait_time = round(wait_time * decreasers[0] * decreasers[1])
         sail_time = round(sail_time * decreasers[0] * decreasers[1])
-        super().__init__(name, x, y, width, height, points, wait_time, effects, dock_color, dock_image, dock_animation)
+        super().__init__(name, x, y, width, height, dock_texture, points, wait_time, effects)
         self._sailing = False
         self._sail_time = sail_time
         self._speed = speed
-        if ship_image != None:
-            ship_w = ship_image.get_width()
-            ship_h = ship_image.get_height()
-        elif ship_animation != None:
-            frame = ship_animation.frames[0]
-            ship_w = frame.get_width()
-            ship_h = frame.get_height()
+        ship_w, ship_h = ship_texture.rect.size
         ship_x = x - (ship_w/2) + (width/2)
-        self._shipEntity = Entity(name + "Ship", ship_x, 0, ship_w, ship_h, ship_color, ship_image, ship_animation)
+        self._shipEntity = Entity(name + "Ship", ship_x, 0, ship_w, ship_h, ship_texture)
         self._ship_alive = True
         self.effects = effects
 
@@ -233,28 +215,18 @@ class ShipDock(SpecialItem):
         else:
             if self.when_life_time_out():
                 self.kill()
-        # Animates ship if it can
-        if self._shipEntity.get_render_mode() == "animate":
-            self._shipEntity.animate()
-        # Animates dock if it can
-        if self.get_render_mode() == "animate":
-            self.animate()
-        # Draws timer on current image/frame
-        self.image = self._base_image.copy()
-        self.draw_timer()
 
 
 # Special Item which can shoot the player across the level
 class Cannon(SpecialItem):
     # Class constructor
-    def __init__(self, name, x, y, width, height, points, fuse_time, speed, angle,
+    def __init__(self, name, x, y, width, height, texture, points, fuse_time, speed, angle, \
             increasers=(1,1), decreasers=(1,1), effects = (),
-            color=None, image=None, animation=None,
             **kwargs):
         # Fuse duration and speed reduced by difficulty decreasers
         fuse_time = round(fuse_time * decreasers[0] * decreasers[1])
         speed = round(speed * decreasers[0] * decreasers[1])
-        super().__init__(name, x, y, width, height, points, fuse_time, effects, color, image, animation)
+        super().__init__(name, x, y, width, height, texture, points, fuse_time, effects)
         self._speed = speed
         self._angle = (angle/360) * (2*math.pi)
         self._player_flying = False
@@ -291,7 +263,6 @@ class Cannon(SpecialItem):
 
     # Update method
     def update(self, collide_list, player):
-        #
         if self._life_time > 0:
             if not self._player_flying:
                 if self.get_name() in collide_list:
@@ -303,64 +274,54 @@ class Cannon(SpecialItem):
                     self.when_player_falling(player)
                 elif player_dy == 0:
                     self.when_player_land(player)
-        #
         else:
             self.kill()
-        # Draws timer on current image/frame
-        self.image = self._base_image.copy()
-        self.draw_timer()
 
 
 # Special Item that speeds the player (Also changes player sprite to a mounted player)
 # Speed duration reduced by difficulty decreasers
 class Horse(SpecialItem):
-    def __init__(self, name, x, y, width, height, points, \
+    def __init__(self, name, x, y, width, height, texture, points, \
         increasers=(1,1), decreasers=(1,1), \
-        color=None, image=None, animation=None,
         **kwargs):
         life_time = 0
         effects = [Effect.FAST, 240, round(15000*decreasers[0]*decreasers[1])]
-        super().__init__(name, x, y, width, height, points, life_time, effects, \
-            color, image, animation)
+        super().__init__(name, x, y, width, height, texture, points, life_time, effects)
 
 
 ''' Subclasses for each type of Enemy '''
 # 
 class Pirate(Enemy):
-    def __init__(self, name, x, y, width, height,
+    def __init__(self, name, x, y, width, height, texture, \
         increasers=(1,1), decreasers=(1,1),
-        color=None, image=None, animation=None,
         **kwargs):
         health, strength, armor, damage, win_points, lose_points = 3, 2, 0.4, 2, 100, 300
         color=(0,0,0)
-        super().__init__(name, x, y, width, height, color, health, strength, armor, damage, win_points, lose_points)
+        super().__init__(name, x, y, width, height, texture, health, strength, armor, damage, win_points, lose_points)
 
 
 class Redcoat(Enemy):
-    def __init__(self, name, x, y, width, height,
+    def __init__(self, name, x, y, width, height, texture, \
         increasers=(1,1), decreasers=(1,1),
-        color=None, image=None, animation=None,
         **kwargs):
         health, strength, armor, damage, win_points, lose_points = 3, 2, 0.4, 2, 100, 300
         color=(255,0,0)
-        super().__init__(name, x, y, width, height, color, health, strength, armor, damage, win_points, lose_points)
+        super().__init__(name, x, y, width, height, texture, health, strength, armor, damage, win_points, lose_points)
 
 
 class Parrot(Enemy):
-    def __init__(self, name, x, y, width, height,
+    def __init__(self, name, x, y, width, height, texture, \
         increasers=(1,1), decreasers=(1,1),
-        color=None, image=None, animation=None,
         **kwargs):
         health, strength, armor, damage, win_points, lose_points = 3, 2, 0.4, 2, 100, 300
         color=(0,255,0)
-        super().__init__(name, x, y, width, height, color, health, strength, armor, damage, win_points, lose_points)
+        super().__init__(name, x, y, width, height, texture, health, strength, armor, damage, win_points, lose_points)
 
 
 class Skeleton(Enemy):
-    def __init__(self, name, x, y, width, height,
+    def __init__(self, name, x, y, width, height, texture, \
         increasers=(1,1), decreasers=(1,1),
-        color=None, image=None, animation=None,
         **kwargs):
         health, strength, armor, damage, win_points, lose_points = 3, 2, 0.4, 2, 100, 300
         color=(255,255,255)
-        super().__init__(name, x, y, width, height, color, health, strength, armor, damage, win_points, lose_points)
+        super().__init__(name, x, y, width, height, texture, health, strength, armor, damage, win_points, lose_points)

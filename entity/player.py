@@ -13,8 +13,8 @@ def update_controls(left, right, jump):
 class playerClass(Character):
     ''' Class constructor.  Takes all arguments from Character plus acceleration and a
         list of maximum speeds. '''
-    def __init__(self, name, x, y, width, height, color, health, accel, max_speeds, strength, armor):
-        super().__init__(name, x, y, width, height, color, health, strength, armor)      # Calls the superclass constructor
+    def __init__(self, name, x, y, width, height, texture, health, accel, max_speeds, strength, armor):
+        super().__init__(name, x, y, width, height, texture, health, strength, armor)      # Calls the superclass constructor
         # Player attributes are declared as private variables
         self._max_hp = health
         self._accel = accel
@@ -37,7 +37,6 @@ class playerClass(Character):
         self._invincible_time = 0
         self._transparent = False
         self._active_effects = []
-        self._frame = self.image
 
     ''' Method that moves the player depending on the user's inputs.  Takes the inputs dict '''
     def user_move(self, inputs, Platforms):
@@ -152,12 +151,12 @@ class playerClass(Character):
     # Enables player invisibility
     def enable_transparency(self):
         self._transparent = True
-        self.image.set_alpha(0)
+        self.texture.set_alpha(0)
 
     # Disables player invisibility
     def disable_transparency(self):
         self._transparent = False
-        self.image.set_alpha(255)
+        self.texture.set_alpha(255)
 
     # Allows the player to move at high velocities (When the player is launched)
     def high_speed_caps(self):
@@ -353,10 +352,11 @@ class playerClass(Character):
         self.user_move(inputs, platforms)
         self.update_effect()
         if self._invincible:
-            if self.image.get_alpha() == 255:
-                self.image.set_alpha(0)
+            # Keep this to not conflict with enable_transparency
+            if self.texture.get_alpha() == 255:
+                self.texture.set_alpha(0)
             else:
-                self.image.set_alpha(255)
+                self.texture.set_alpha(255)
             noDamageGroup = collidables.copy()
             for sprite in noDamageGroup:
                 if (isinstance(sprite, Obstacle) and not isinstance(sprite, Tsunami)) \
@@ -367,7 +367,7 @@ class playerClass(Character):
             if self._invincible_time <= 0:
                 self._invincible = False
         else:
-            self.image.set_alpha(255)
+            self.texture.set_alpha(255)
             collide_list = self.collide_trigger(collidables, playerGroup)
         if self._noclip:
             waveGroup = pygame.sprite.Group()
@@ -376,5 +376,5 @@ class playerClass(Character):
                     waveGroup.add(sprite)
             collide_list = self.collide_trigger(waveGroup, playerGroup)
         if self._transparent:
-            self.image.set_alpha(0)
+            self.texture.set_alpha(0)
         return collide_list

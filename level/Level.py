@@ -8,10 +8,29 @@ from images.Image import *
 
 from var.variables import Effect
 
-# Load spritesheets (TODO: Temporary, to be replaced by loader in Level/World class)
+# Load spritesheets (TODO: Temporary, to be replaced by loader function using config file)
 rootdir = os.path.dirname(os.path.dirname(__file__))
 EntitySheet = pygame.image.load(os.path.join(rootdir, "images\\ItemObstacles.png"))
 CoinSheet = pygame.image.load(os.path.join(rootdir, "images\\Coin.png"))
+# Textures
+CoinAnimation = AnimatedTexture(CoinSheet, 8, (20,20), 8)
+TreasureTexture = ImageTexture(crop(EntitySheet, (40, 0), (40, 40)))
+BandageTexture = ImageTexture(crop(EntitySheet, (80, 0), (40, 40)))
+MedkitTexture = ImageTexture(crop(EntitySheet, (0, 40), (40, 40)))
+RumTexture = ImageTexture(crop(EntitySheet, (40, 40), (40, 40)))
+AnchorTexture = ImageTexture(crop(EntitySheet, (0, 80), (40, 40)))
+BarrelTexture = ImageTexture(crop(EntitySheet, (40, 80), (40, 40)))
+CrateTexture = ImageTexture(crop(EntitySheet, (80, 80), (40, 40)))
+HorseTexture = ImageTexture(crop(EntitySheet, (80, 40), (40, 40)))
+DockTexture = ColorTexture(GREEN)
+ShipTexture = ColorTexture(BLUE)
+ShipTexture.scale(400, 200)
+CannonTexture = ColorTexture(YELLOW)
+PirateTexture = ColorTexture((0, 0, 0))
+RedcoatTexture = ColorTexture((255, 0, 0))
+ParrotTexture = ColorTexture((0, 255, 0))
+SkeletonTexture = ColorTexture((255, 255, 255))
+
 # Crop and arrange each frame of coin sprite
 # coin_frames = []
 # for i in range(8):
@@ -135,7 +154,8 @@ class Level:
         # Build sprites from level data
         self.__build_sprites(Collidables, Drawables, global_diff_inc, global_diff_dec)
         # Create Wave
-        Wave = Tsunami("wave", -self.w, 0, self.w, self.h, 5, 5000, color=(0,0,255))
+        WaveTexture = ColorTexture((0,0,255))
+        Wave = Tsunami("wave", -self.w, 0, self.w, self.h, WaveTexture, 5, 5000)
         Drawables.add(Wave, layer=5)
         Collidables.add(Wave)
         # Output Groups and other objects required by game
@@ -144,9 +164,10 @@ class Level:
     def __build_platforms(self, Collidables, Platforms, Drawables):
         PlatformSheet = pygame.image.load(self.platform_tilepath)
         for p_i in self.platforms_data:
+            PlatformTexture = ImageTexture(crop(PlatformSheet, p_i["src"], self.platform_size))
             platform = Platform(**p_i,
                 width=self.platform_size[0], height=self.platform_size[1],
-                image=crop(PlatformSheet, p_i["src"], self.platform_size)
+                texture=PlatformTexture
             )
             Collidables.add(platform)
             Platforms.add(platform)
@@ -159,54 +180,54 @@ class Level:
             # Item Sprites
             if sprite_d["type"] == "Coin":
                 Sprite = Coin(**sprite_d,
-                    animation=Animation(os.path.join(rootdir, "images\\Coin.png"), 8, (20,20), 8))
+                    texture=CoinAnimation.copy())
             elif sprite_d["type"] == "Treasure":
                 Sprite = Treasure(**sprite_d,
-                    image=crop(EntitySheet, (40, 0), (40, 40)))
+                    texture=TreasureTexture)
             elif sprite_d["type"] == "Bandage":
                 Sprite = Bandage(**sprite_d,
-                    image=crop(EntitySheet, (80, 0), (40, 40)))
+                    texture=BandageTexture)
             elif sprite_d["type"] == "Medkit":
                 Sprite = Medkit(**sprite_d,
-                    image=crop(EntitySheet, (0, 40), (40, 40)))
+                    texture=MedkitTexture)
             elif sprite_d["type"] == "Rum":
                 Sprite = Rum(**sprite_d,
-                    image=crop(EntitySheet, (40, 40), (40, 40)))
+                    texture=RumTexture)
             # Obstacle Sprites
             elif sprite_d["type"] == "Anchor":
                 Sprite = Anchor(**sprite_d,
-                    image=crop(EntitySheet, (0, 80), (40, 40)))
+                    texture=AnchorTexture)
             elif sprite_d["type"] == "Barrel":
                 Sprite = Barrel(**sprite_d,
-                    image=crop(EntitySheet, (40, 80), (40, 40)))
+                    texture=BarrelTexture)
             elif sprite_d["type"] == "Crate":
                 Sprite = Crate(**sprite_d,
-                    image=crop(EntitySheet, (80, 80), (40, 40)))
+                    texture=CrateTexture)
             # Special Item Sprites
             elif sprite_d["type"] == "Horse":
                 Sprite = Horse(**sprite_d,
-                    image=crop(EntitySheet, (80, 40), (40, 40)))
+                    texture=HorseTexture)
             elif sprite_d["type"] == "ShipDock":
                 Sprite = ShipDock(**sprite_d,
-                    dock_color=GREEN, ship_w=400, ship_h=200, ship_color=BLUE)
+                    dock_texture=DockTexture, ship_texture=ShipTexture)
                 Sprite.ship_on_water(self.h)
                 Sprite.ship_drawable(Drawables)
             elif sprite_d["type"] == "Cannon":
                 Sprite = Cannon(**sprite_d,
-                    color=YELLOW)
+                    texture=CannonTexture)
             # Enemy Sprites
             elif sprite_d["type"] == "Pirate":
                 Sprite = Pirate(**sprite_d,
-                    color=(0, 0, 0))
+                    texture=PirateTexture)
             elif sprite_d["type"] == "Redcoat":
                 Sprite = Redcoat(**sprite_d,
-                    color=(255, 0, 0))
+                    texture=RedcoatTexture)
             elif sprite_d["type"] == "Parrot":
                 Sprite = Parrot(**sprite_d,
-                    color=(0, 255, 0))
+                    texture=ParrotTexture)
             elif sprite_d["type"] == "Skeleton":
                 Sprite = Skeleton(**sprite_d,
-                    color=(255, 255, 255))
+                    texture=SkeletonTexture)
             # Add Sprite to groups
             Collidables.add(Sprite)
             Drawables.add(Sprite, layer=3)

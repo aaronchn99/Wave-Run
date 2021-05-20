@@ -1,9 +1,89 @@
 from var.variables import *
-from entity.Sprites import Entity
+import pygame
 p_speed = 5
 
 
 ''' Classes '''
+hitbox_mode = 0
+# Base class for Menu Objects (TODO: Refactor out unnecessary code)
+class Entity(pygame.sprite.Sprite):
+    # The class constructor. Takes the sprite name, position, dimensions and fill colour
+    def __init__(self, name, x, y, width, height, color=None, image=None, animation=None):
+        # Calls the superclass' constructor (i.e. Sprite class)
+        super().__init__()
+        # Positional and dimensional attributes
+        self._w, self._h = width, height
+        self._x, self._y = x, y
+        # The entity's name is assigned. Used for sprite identification
+        self._name = check_name(name)   # check_name called to check uniqueness
+        # An image of the Sprite is assigned by creating a new Surface object and filling
+        # it with the specified colour
+        if image != None:
+            self.image = image.convert_alpha()
+            self.image = pygame.transform.scale(self.image, (self._w, self._h))
+            self._render_mode = "image"
+        elif color != None:
+            self.image = pygame.Surface((self._w, self._h), flags=pygame.SRCALPHA)
+            self.image.fill(color)
+            self._render_mode = "color"
+        elif animation != None:
+            self._animation = animation
+            self.image = self._animation.frames[0]
+            self._render_mode = "animate"
+        else:
+            self.image = pygame.Surface((self._w, self._h), flags=pygame.SRCALPHA)
+            self._render_mode = "black"
+        if hitbox_mode:
+            pygame.draw.rect(self.image, GREEN, (0,0,self._w,self._h), 1)
+        # The Entity object's rect attribute is a Rect object with the dimensions of the
+        # above image. Used to hold and position the sprite
+        self.rect = self.image.get_rect()
+        # The rect is positioned at the specified coordinates
+        self.rect.x, self.rect.y = self._x, self._y
+
+    # Method that returns the entity's name
+    def get_name(self):
+        return self._name
+
+    # Sets the Entity's position
+    def set_pos(self, x, y):
+        self._x, self._y = x, y
+        self.update_pos()
+
+    # Returns Entity's current coords using the _x and _y attributes
+    def get_pos(self):
+        return self._x, self._y
+
+    # Scrolls the entity by the specified scroll amount
+    def scroll(self, vel):
+        dx = vel[0]
+        dy = vel[1]
+        self._x = self._x + dx
+        self._y = self._y + dy
+        self.update_pos()
+
+    # Update the rect coords
+    def update_pos(self):
+        self.rect.x = self._x
+        self.rect.y = self._y
+
+    # Draws the entity. Used by entities except for entities in groups
+    def draw(self):
+        Frame.blit(self.image, self.rect)
+
+    # Animates the entity by changing the current frame (Does not draw the frame)
+    def animate(self):
+        self.image = self._animation.next_frame(Clock.get_time())
+
+    # Returns the rendering mode (color/image/animate/black)
+    def get_render_mode(self):
+        return self._render_mode
+
+    def kill(self):
+        remove_name(self._name)
+        super().kill()
+
+
 # Base class for interactive menu objects
 class guiObj(Entity):
     # Constructor for gui objects

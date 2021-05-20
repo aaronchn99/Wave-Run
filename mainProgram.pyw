@@ -614,7 +614,8 @@ if __name__ == "__main__":
         elif mode == ScreenMode.PLAY:
             # Initialises game
             if not game_init:
-                playerSprite = playerClass("player", 0, 0, 32, 48, RED, health, player_accel,
+                PlayerTexture = ColorTexture(RED)
+                playerSprite = playerClass("player", 0, 0, 32, 48, PlayerTexture, health, player_accel,
                                            ((max_dx, min_dx), (max_dy, min_dy)), 1, 0.4)
                 # Resetting money and score
                 reset_money_score()

@@ -7,7 +7,7 @@ hitbox_mode = 0
 # Base class for all in game sprites, inherited from Sprite from Pygame
 class Entity(pygame.sprite.Sprite):
     # The class constructor. Takes the sprite name, position, dimensions and fill colour
-    def __init__(self, name, x, y, width, height, color=None, image=None, animation=None):
+    def __init__(self, name, x, y, width, height, texture):
         # Calls the superclass' constructor (i.e. Sprite class)
         super().__init__()
         # Positional and dimensional attributes
@@ -15,28 +15,11 @@ class Entity(pygame.sprite.Sprite):
         self._x, self._y = x, y
         # The entity's name is assigned. Used for sprite identification
         self._name = check_name(name)   # check_name called to check uniqueness
-        # An image of the Sprite is assigned by creating a new Surface object and filling
-        # it with the specified colour
-        if image != None:
-            self.image = image.convert_alpha()
-            self.image = pygame.transform.scale(self.image, (self._w, self._h))
-            self._render_mode = "image"
-        elif color != None:
-            self.image = pygame.Surface((self._w, self._h), flags=pygame.SRCALPHA)
-            self.image.fill(color)
-            self._render_mode = "color"
-        elif animation != None:
-            self._animation = animation
-            self.image = self._animation.frames[0]
-            self._render_mode = "animate"
-        else:
-            self.image = pygame.Surface((self._w, self._h), flags=pygame.SRCALPHA)
-            self._render_mode = "black"
-        if hitbox_mode:
-            pygame.draw.rect(self.image, GREEN, (0,0,self._w,self._h), 1)
+        self.texture = texture
+        self.texture.scale(width, height)
         # The Entity object's rect attribute is a Rect object with the dimensions of the
         # above image. Used to hold and position the sprite
-        self.rect = self.image.get_rect()
+        self.rect = self.texture.rect
         # The rect is positioned at the specified coordinates
         self.rect.x, self.rect.y = self._x, self._y
 
@@ -66,17 +49,16 @@ class Entity(pygame.sprite.Sprite):
         self.rect.x = self._x
         self.rect.y = self._y
 
-    # Draws the entity. Used by entities except for entities in groups
+    @property
+    def image(self):
+        img = self.texture.surface
+        if hitbox_mode:
+            pygame.draw.rect(img, GREEN, (0,0,self._w,self._h), 1)
+        return img
+    
+    # Draws the entity. Used by entities except for entities in groups TODO: Deprecate
     def draw(self):
         Frame.blit(self.image, self.rect)
-
-    # Animates the entity by changing the current frame (Does not draw the frame)
-    def animate(self):
-        self.image = self._animation.next_frame(Clock.get_time())
-
-    # Returns the rendering mode (color/image/animate/black)
-    def get_render_mode(self):
-        return self._render_mode
 
     def kill(self):
         remove_name(self._name)
@@ -87,9 +69,9 @@ class Entity(pygame.sprite.Sprite):
 # that is applied to the player upon collision. Inherits the Entity class.
 class Item(Entity):
     # Class constructor
-    def __init__(self, name, x, y, width, height, points, effects = (), color=None, image=None, animation=None):
+    def __init__(self, name, x, y, width, height, texture, points, effects = ()):
         # Calls superclass' constructor
-        super().__init__(name, x, y, width, height, color, image, animation)
+        super().__init__(name, x, y, width, height, texture)
         # Private attribute for points that the player collects upon picking this item up
         self._points = points
         # Effect list is a list of 3 element arrays in this form: [type, amount, duration]
@@ -134,8 +116,6 @@ class Item(Entity):
 
     # Updates sprite, which is called by the Collidables group
     def update(self, collide_list, player):
-        if self._render_mode == "animate":
-            self.animate()
         # If this sprite is colliding with the player, it calls the whenCollide() method and then
         # kills itself, which removes itself from all groups
         if self.get_name() in collide_list:
@@ -148,28 +128,35 @@ class Item(Entity):
 # Item which required more than adding an effect to the player
 class SpecialItem(Item):
     # Class constructor
-    def __init__(self, name, x, y, width, height, points, life_time, effects = (), color=None, image=None, animation=None):
-        super().__init__(name, x, y, width, height, points, effects, color, image, animation)
+    def __init__(self, name, x, y, width, height, texture, points, life_time, effects = ()):
+        super().__init__(name, x, y, width, height, texture, points, effects)
         self._life_time = life_time
         self._start_life_time = life_time
-        if self._render_mode != "animate":
-            self._base_image = self.image.copy()
 
     # Counts down the item's time until it is removed from the level
     def lifeCountdown(self):
         self._life_time -= Clock.get_time()
 
-    # Draws the life timer bar over the image/frame
-    def draw_timer(self):
+    # Draws the life timer bar onto sprite image
+    def draw_timer(self, image):
+        # Sanity Check
+        if self._life_time == 0:
+            return
         length = (self._w)*(self._life_time/self._start_life_time)
-        pygame.draw.rect(self.image, RED, (0, (self._h/2)-5, length, 10))
+        pygame.draw.rect(image, RED, (0, (self._h/2)-5, length, 10))
+    
+    @property
+    def image(self):
+        img = super().image.copy()
+        self.draw_timer(img)
+        return img
 
 
 # Class for obstacle sprites.
 class Obstacle(Entity):
     # Class constructor
-    def __init__(self, name, x, y, width, height, damage, lost_points, knockout_time, color=None, image=None, animation=None):
-        super().__init__(name, x, y, width, height, color, image, animation)
+    def __init__(self, name, x, y, width, height, texture, damage, lost_points, knockout_time):
+        super().__init__(name, x, y, width, height, texture)
         # The damage inflicted on the player upon collision.
         self._damage = damage
         # Points the player loses upon collision.
@@ -208,9 +195,9 @@ class Obstacle(Entity):
 # Character class for all character sprites, including the Player
 class Character(Entity):
     # Class constructor, with one extra argument: health
-    def __init__(self, name, x, y, width, height, color, health, strength, armor):
+    def __init__(self, name, x, y, width, height, texture, health, strength, armor):
         # Calls superclass' constructor
-        super().__init__(name, x, y, width, height, color)
+        super().__init__(name, x, y, width, height, texture)
         self._health = health       # Declares the private attribute health
         self._sp = strength         # Declares the strength attribute for attacking
         self._ap = armor            # Declares the armor attribute for defence
@@ -231,9 +218,9 @@ class Character(Entity):
 # Class for Enemy characters who can attack the player
 class Enemy(Character):
     # Class constructor
-    def __init__(self, name, x, y, width, height, color, health, strength, armor, damage, win_points, lose_points):
+    def __init__(self, name, x, y, width, height, texture, health, strength, armor, damage, win_points, lose_points):
         # Calls Character constructor
-        super().__init__(name, x, y, width, height, color, health, strength, armor)
+        super().__init__(name, x, y, width, height, texture, health, strength, armor)
         self._damage = damage           # Damage dealt when player loses
         self._win_p = win_points        # Points added when player wins
         self._lose_p = lose_points      # Points taken when player loses

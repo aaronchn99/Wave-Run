@@ -4,9 +4,9 @@ from .Sprites import Entity
 # Platform class for collidable platforms (Inherits Entity)
 class Platform(Entity):
     # Class constructor required name, position, dimensions and colour
-    def __init__(self, name, x, y, width, height, color=None, image=None, **kwargs):
+    def __init__(self, name, x, y, width, height, texture, **kwargs):
         # Calls the superclass' constructor (i.e. Entity)
-        super().__init__(name, x, y, width, height, color=color, image=image)
+        super().__init__(name, x, y, width, height, texture)
 
     # Method for executing scripts upon collision with the Player
     def whenCollide(self):
