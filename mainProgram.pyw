@@ -317,14 +317,6 @@ if __name__ == "__main__":
     # Loading spritesheets
     HeartSheet = pygame.image.load("images\\Hearts.png")
     EffectSheet = pygame.image.load("images\\Effects.png")
-    EntitySheet = pygame.image.load("images\\ItemObstacles.png")
-    PlatformSheet = pygame.image.load("images\\Platforms.png")
-    CoinSheet = pygame.image.load("images\\Coin.png")
-
-    # Crop and arrange each frame of coin sprite
-    coin_frames = []
-    for i in range(8):
-        coin_frames.append(crop(CoinSheet, (40*i, 0), (40, 40)))
 
     # Loading level data
     game_world = World(LEVEL_ROOT)

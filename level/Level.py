@@ -31,10 +31,6 @@ RedcoatTexture = ColorTexture((255, 0, 0))
 ParrotTexture = ColorTexture((0, 255, 0))
 SkeletonTexture = ColorTexture((255, 255, 255))
 
-# Crop and arrange each frame of coin sprite
-# coin_frames = []
-# for i in range(8):
-#     coin_frames.append(crop(CoinSheet, (20*i, 0), (20, 20)))
 
 # String to Effect mapping
 effect_map = {
