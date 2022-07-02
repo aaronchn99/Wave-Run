@@ -317,6 +317,7 @@ if __name__ == "__main__":
     # Loading spritesheets
     HeartSheet = pygame.image.load("images\\Hearts.png")
     EffectSheet = pygame.image.load("images\\Effects.png")
+    PlayerSheet = pygame.image.load(os.path.join(rootdir, "images\\Pirate.png"))
 
     # Loading level data
     game_world = World(LEVEL_ROOT)
@@ -606,7 +607,7 @@ if __name__ == "__main__":
         elif mode == ScreenMode.PLAY:
             # Initialises game
             if not game_init:
-                PlayerTexture = ColorTexture(RED)
+                PlayerTexture = ImageTexture(PlayerSheet)
                 playerSprite = playerClass("player", 0, 0, 32, 48, PlayerTexture, health, player_accel,
                                            ((max_dx, min_dx), (max_dy, min_dy)), 1, 0.4)
                 # Resetting money and score
