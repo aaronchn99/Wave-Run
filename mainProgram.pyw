@@ -7,8 +7,6 @@ pygame.init()
 
 from entity.Sprites import *
 from entity.player import playerClass, update_controls
-from entity.platforms import Platform
-from entity.wave import Tsunami
 from entity.non_player import *
 from gui.MenuObjs import *
 from Images import *
@@ -27,7 +25,6 @@ pygame.display.set_mode(resolution, pygame.FULLSCREEN)
 # Game program variables
 close = False
 mode = ScreenMode.MAIN           # Controls what screen to show
-loaded = False          # If level has loaded
 game_init = False       # If game environment has initialised (Player, HUD, Rects, Pause menu)
 shop_init = False       # If shop menu has initialised
 combat_init = False     # If combat UI has initialised
@@ -256,11 +253,11 @@ def lvl_clear(inputs):
     # First, the window is filled white
     Frame.fill(LIGHT_BLUE)
     # Draw camera to Frame
-    GameCam.draw_to_surface(Drawables, Frame)
+    GameCam.draw_to_surface(level.Drawables, Frame)
     # Draw HUD
     Hud.draw_hud(Frame)
-    playerSprite.update({"key": [right_key]}, (), Platforms, playerGroup)
-    Wave.update([], playerSprite)
+    playerSprite.update({"key": [right_key]}, (), level.Platforms, level.playerGroup)
+    level.Wave.update([], playerSprite)
     winText = headerFont.render("Level Clear", False, GREEN)
     continueText = subFont.render("Press any key to continue", False, GREEN)
     pos = winText.get_rect(center=(int(native_res[0] / 2), int(native_res[1] / 2))).topleft
@@ -460,7 +457,6 @@ if __name__ == "__main__":
                 if button.get_trigger():
                     mode = ScreenMode.PLAY       # If the Start New button was triggered, mode is set to "play"
                     game_init = False
-                    loaded = False
                     level = game_world.first_level
             if Main.find_obj("setting") != False:
                 button = Main.find_obj("setting")
@@ -622,27 +618,26 @@ if __name__ == "__main__":
                 pauseRect.center = (round(native_res[0] / 2), round(native_res[1] / 2))
                 game_init = True
 
-            # Constructs a new level when not already loaded
-            if not loaded:
-                Drawables, Collidables, Platforms, playerGroup, EndArea, Wave = level.build(playerSprite, 1, 1)
+            # Builds level and setup camera
+            if not level.is_built:
+                level.build(playerSprite, 1, 1)
                 # Camera object that views into world (scrolls screen through course)
                 GameCam = Camera((level.w, level.h))
                 tile_progress = 0
-                loaded = True
 
             # Gives pause button mouse input
             pauseButton.mouse_input(inputs)
             if not pause:
                 if playerSprite.get_opponent() == None:
-                    collide_list = playerSprite.update(inputs, Collidables, Platforms, playerGroup)
-                    Collidables.update(collide_list, playerSprite)
+                    collide_list = playerSprite.update(inputs, level.Collidables, level.Platforms, level.playerGroup)
+                    level.Collidables.update(collide_list, playerSprite)
                     GameCam.set_scroll(playerSprite)
-                    GameCam.apply(Drawables, EndArea)
+                    GameCam.apply(level.Drawables, level.EndArea)
 
                     # The player's progress in the course is calculated
-                    progress = (playerSprite.get_pos()[0] - GameCam.get_course_rect().left)/(EndArea.left - GameCam.get_course_rect().left)
-                    # The wave's progress in the course is calculated
-                    wave_progress = (Wave.rect.right - GameCam.get_course_rect().left)/(EndArea.left - GameCam.get_course_rect().left)
+                    progress = (playerSprite.get_pos()[0] - GameCam.get_course_rect().left)/(level.EndArea.left - GameCam.get_course_rect().left)
+                    # The Wave's progress in the course is calculated
+                    wave_progress = (level.Wave.rect.right - GameCam.get_course_rect().left)/(level.EndArea.left - GameCam.get_course_rect().left)
                     # The player's tile position is calculated for the score_distance function
                     player_pos = playerSprite.get_pos()[0] - GameCam.get_course_rect().left
                     tile_progress = score_distance(player_pos, tile_progress)
@@ -707,7 +702,7 @@ if __name__ == "__main__":
 
             if playerSprite.get_hp() <= 0:
                 mode = ScreenMode.LOSE
-            elif playerSprite.rect.colliderect(EndArea):
+            elif playerSprite.rect.colliderect(level.EndArea):
                 playerSprite.disable_invincibility()
                 if playerSprite.is_sailing():
                     playerSprite.jump_ship()
@@ -718,7 +713,7 @@ if __name__ == "__main__":
             # First, the window is filled white
             Frame.fill(LIGHT_BLUE)
             # Draw camera to Frame
-            GameCam.draw_to_surface(Drawables, Frame)
+            GameCam.draw_to_surface(level.Drawables, Frame)
             # Finally, the HUD is drawn
             Hud.draw_hud(Frame)
             pauseButton.draw()
@@ -779,7 +774,8 @@ if __name__ == "__main__":
                     dlvl = menu_lvls[trait] - current_lvls[trait]
                     if dlvl > 0:
                         playerSprite.upgrade_trait(trait, dlvl)
-                Level.destroy(Drawables, Collidables, Platforms)
+                level.destroy()
+                level = game_world.next_level
                 mode = ScreenMode.PLAY                   # Transistions back to the game
                 shop_init = False               # De-initialises shop menu
             # Drawing code
@@ -810,30 +806,26 @@ if __name__ == "__main__":
 
         # The game over procedure is called when the player's health is zero or lower
         elif mode == ScreenMode.LOSE:
-            Level.destroy(Drawables, playerGroup, Collidables, Platforms)
+            level.destroy()
             option = game_over()
             if option == "main":
                 mode = ScreenMode.MAIN
             elif option == "retry":
                 mode = ScreenMode.PLAY
                 game_init = False
-                loaded = False
                 level = game_world.first_level
 
         # Handles when the player has cleared a level
         elif mode == ScreenMode.PASS:
-            cont = lvl_clear(inputs)
-            if cont:
+            if lvl_clear(inputs):   # Player wants to continue
                 if game_world.on_last_level:
                     mode = ScreenMode.WIN
                 else:
-                    level = game_world.next_level
                     mode = ScreenMode.SHOP
-                    loaded = False
 
         # Handles when the player has won the game
         elif mode == ScreenMode.WIN:
-            Level.destroy(Drawables, playerGroup, Collidables, Platforms)
+            level.destroy()
             game_win()
             if pygame.K_RETURN in inputs["key"]:
                 mode = ScreenMode.MAIN

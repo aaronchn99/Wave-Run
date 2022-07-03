@@ -45,6 +45,8 @@ effect_map = {
 class Level:
     # Takes path of level data file (i.e. ldtkl file)
     def __init__(self, path):
+        # Declares sprite groups and objects
+        self.Drawables, self.playerGroup, self.Collidables, self.Platforms, self.EndArea, self.Wave = [None for i in range(6)]
         # Full directory path of level package
         dirpath = os.path.realpath(os.path.dirname(os.path.dirname(path)))
         with open(path, "r") as fp:
@@ -123,39 +125,37 @@ class Level:
     # player - Sprite object of player (Created outside of level to maintain traits across levels)
     # global_diff_inc - Difficulty increasing modifier set from settings
     # global_diff_dec - Difficulty decreasing modifier set from settings
-    # Returns:
+    # Created Sprite groups (Stored as public member variables):
     # Drawables - Group of visible sprites
     # Collidables - Group of sprites that collide with player
     # Platforms - Group of platforms
     # playerGroup - Single sprite group containing the player (for collision detection)
-    # EndRect - Rect object covering finish area of level
+    # EndArea - Rect object covering finish area of level
     # Wave - Tsunami instance
     def build(self, player, global_diff_inc, global_diff_dec):
         # Create Sprite Groups
-        Drawables = pygame.sprite.LayeredUpdates()
-        playerGroup = pygame.sprite.GroupSingle()
-        Collidables = pygame.sprite.Group()
-        Platforms = pygame.sprite.Group()
+        self.Drawables = pygame.sprite.LayeredUpdates()
+        self.playerGroup = pygame.sprite.GroupSingle()
+        self.Collidables = pygame.sprite.Group()
+        self.Platforms = pygame.sprite.Group()
         # Build end area Rect
         end_area = (self.w-self.end_pos[0], self.h)
-        EndRect = pygame.Rect(self.end_pos, end_area)
+        self.EndArea = pygame.Rect(self.end_pos, end_area)
         # Set player position, reset effects, velocity and add to groups
         player.set_pos(self.player_x, self.player_y)
         player.clear_effects()
         player.set_vel(0,0)
-        playerGroup.add(player)
-        Drawables.add(player, layer=4)
+        self.playerGroup.add(player)
+        self.Drawables.add(player, layer=4)
         # Build platforms from level data
-        self.__build_platforms(Collidables, Platforms, Drawables)
+        self.__build_platforms(self.Collidables, self.Platforms, self.Drawables)
         # Build sprites from level data
-        self.__build_sprites(Collidables, Drawables, global_diff_inc, global_diff_dec)
+        self.__build_sprites(self.Collidables, self.Drawables, global_diff_inc, global_diff_dec)
         # Create Wave
         WaveTexture = ColorTexture((0,0,255))
-        Wave = Tsunami("wave", -self.w, 0, self.w, self.h, WaveTexture, 5, 5000)
-        Drawables.add(Wave, layer=5)
-        Collidables.add(Wave)
-        # Output Groups and other objects required by game
-        return Drawables, Collidables, Platforms, playerGroup, EndRect, Wave
+        self.Wave = Tsunami("wave", -self.w, 0, self.w, self.h, WaveTexture, 5, 5000)
+        self.Drawables.add(self.Wave, layer=5)
+        self.Collidables.add(self.Wave)
     
     def __build_platforms(self, Collidables, Platforms, Drawables):
         PlatformSheet = pygame.image.load(self.platform_tilepath)
@@ -228,9 +228,20 @@ class Level:
             Collidables.add(Sprite)
             Drawables.add(Sprite, layer=3)
 
-    @staticmethod
-    # Takes sprite groups from game and destroys all sprites in these groups
-    def destroy(*groups):
-        for group in groups:
+    @property
+    def is_built(self):
+        return all([self.Drawables, self.playerGroup, self.Collidables, self.Platforms, self.EndArea, self.Wave])
+
+    # Destroys all sprites in groups, then empties 
+    def destroy(self):
+        if not self.is_built:
+            return
+        for group in [self.Drawables, self.playerGroup, self.Collidables, self.Platforms]:
             for sprite in group:
                 sprite.kill()
+        self.Drawables = None
+        self.playerGroup = None
+        self.Collidables = None
+        self.Platforms = None
+        self.EndArea = None
+        self.Wave = None
