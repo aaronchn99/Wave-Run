@@ -55,10 +55,6 @@ class Entity(pygame.sprite.Sprite):
         if hitbox_mode:
             pygame.draw.rect(img, GREEN, (0,0,self._w,self._h), 1)
         return img
-    
-    # Draws the entity. Used by entities except for entities in groups TODO: Deprecate
-    def draw(self):
-        Frame.blit(self.image, self.rect)
 
     def kill(self):
         remove_name(self._name)

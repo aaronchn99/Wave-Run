@@ -37,6 +37,8 @@ class playerClass(Character):
         self._invincible_time = 0
         self._transparent = False
         self._active_effects = []
+        # Determines whether to flip the sprite
+        self._facing_left = False
 
     ''' Method that moves the player depending on the user's inputs.  Takes the inputs dict '''
     def user_move(self, inputs, Platforms):
@@ -47,6 +49,7 @@ class playerClass(Character):
         dt = Clock.get_time()/1000
         ''' Horizontal movement '''
         if left_key in inputs["key"]:
+            self._facing_left = True
             if self._dx > 0:
                 self._dx = 0                # If the player was moving to the right, the player is stopped
             elif self._dx > self._min_dx:
@@ -54,6 +57,7 @@ class playerClass(Character):
             elif self._dx <= self._min_dx:
                 self._dx = self._min_dx     # Sets player speed to the maximum speed if it exceeds it
         if right_key in inputs["key"]:
+            self._facing_left = False
             if self._dx < 0:
                 self._dx = 0                # If the player is moving to the left, it stops
             elif self._dx < self._max_dx:
@@ -341,6 +345,14 @@ class playerClass(Character):
     # Returns whether the player is invincible or not
     def get_invincibility(self):
         return self._invincible
+
+    # Overriding image to flip sprite based on facing direction
+    @property
+    def image(self):
+        img = super().image
+        if self._facing_left:
+            img = pygame.transform.flip(img, True, False)
+        return img
 
     # Method to update the player sprite. Used by playerGroup. Returns the list of colliding
     # sprites with the player
