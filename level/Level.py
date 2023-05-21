@@ -10,8 +10,8 @@ from var.variables import Effect
 
 # Load spritesheets (TODO: Temporary, to be replaced by loader function using config file)
 rootdir = os.path.dirname(os.path.dirname(__file__))
-EntitySheet = pygame.image.load(os.path.join(rootdir, "images\\ItemObstacles.png"))
-CoinSheet = pygame.image.load(os.path.join(rootdir, "images\\Coin.png"))
+EntitySheet = pygame.image.load(os.path.join(rootdir, "images", "ItemObstacles.png"))
+CoinSheet = pygame.image.load(os.path.join(rootdir, "images", "Coin.png"))
 # Textures
 CoinAnimation = AnimatedTexture(CoinSheet, 8, (20,20), 8)
 TreasureTexture = ImageTexture(crop(EntitySheet, (40, 0), (40, 40)))
