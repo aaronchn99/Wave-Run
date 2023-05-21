@@ -315,9 +315,9 @@ if __name__ == "__main__":
     # Fonts for labels
     labelFont = pygame.font.Font("PressStart2P.ttf", 30)
     # Loading spritesheets
-    HeartSheet = pygame.image.load("images\\Hearts.png")
-    EffectSheet = pygame.image.load("images\\Effects.png")
-    PlayerSheet = pygame.image.load(os.path.join(rootdir, "images\\Pirate.png"))
+    HeartSheet = pygame.image.load(os.path.join("images", "Hearts.png"))
+    EffectSheet = pygame.image.load(os.path.join("images", "Effects.png"))
+    PlayerSheet = pygame.image.load(os.path.join(rootdir, "images", "Pirate.png"))
 
     # Loading level data
     game_world = World(LEVEL_ROOT)
